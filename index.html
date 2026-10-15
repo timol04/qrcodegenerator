@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>QR Code Generator Pro</title>
+  </head>
+  <body>
+    <main class="app">
+      <header class="app__header">
+        <h1>QR Code Generator</h1>
+        <a class="btn btn--upgrade" id="upgrade-top" target="_blank" rel="noopener">Upgrade auf Pro</a>
+      </header>
+
+      <div class="app__grid">
+        <!-- Eingabe -->
+        <section class="card">
+          <label for="qr-text">Text oder URL</label>
+          <textarea id="qr-text" rows="4" placeholder="https://example.com"></textarea>
+
+          <h2 class="section-title">Pro-Funktionen</h2>
+          <ul class="premium-list" id="premium-list"></ul>
+        </section>
+
+        <!-- Vorschau -->
+        <section class="card card--preview">
+          <div class="preview" id="preview"></div>
+          <p class="hint" id="hint">Gib Text ein, um den QR-Code zu erzeugen.</p>
+          <button class="btn btn--primary" id="download-png" disabled>Als PNG herunterladen</button>
+        </section>
+      </div>
+    </main>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

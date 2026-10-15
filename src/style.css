@@ -1,0 +1,50 @@
+:root {
+  --bg: #f4f5f7;
+  --card: #fff;
+  --text: #1c1e21;
+  --muted: #6b7280;
+  --accent: #4f46e5;
+  --border: #e5e7eb;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+}
+.app { max-width: 880px; margin: 0 auto; padding: 16px; }
+.app__header { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+h1 { font-size: 1.4rem; margin: 8px 0; }
+.app__grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 12px; }
+/* Mobil: Eingabe oben, Vorschau darunter */
+@media (max-width: 700px) { .app__grid { grid-template-columns: 1fr; } }
+
+.card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 16px; }
+.card--preview { display: flex; flex-direction: column; align-items: center; gap: 12px; }
+label { font-weight: 600; display: block; margin-bottom: 6px; }
+textarea {
+  width: 100%; font: inherit; padding: 10px; resize: vertical;
+  border: 1px solid var(--border); border-radius: 8px;
+}
+textarea:focus { outline: 2px solid var(--accent); border-color: transparent; }
+.section-title { font-size: .9rem; color: var(--muted); margin: 20px 0 8px; text-transform: uppercase; letter-spacing: .04em; }
+
+.preview { min-height: 300px; display: flex; align-items: center; justify-content: center; max-width: 100%; }
+.preview canvas { max-width: 100%; height: auto !important; }
+.preview.is-empty canvas { opacity: .08; }
+.hint { color: var(--muted); margin: 0; text-align: center; }
+
+.btn {
+  display: inline-block; border: 0; border-radius: 8px; padding: 10px 16px;
+  font: inherit; font-weight: 600; cursor: pointer; text-decoration: none;
+}
+.btn--primary { background: var(--accent); color: #fff; }
+.btn--primary:disabled { opacity: .4; cursor: not-allowed; }
+.btn--upgrade { background: #f59e0b; color: #1c1e21; padding: 8px 14px; }
+
+.premium-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.premium-item {
+  padding: 10px 12px; border: 1px dashed var(--border); border-radius: 8px;
+  color: var(--muted); background: #fafafa; opacity: .7; cursor: not-allowed; user-select: none;
+}
