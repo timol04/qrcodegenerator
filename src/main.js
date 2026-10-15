@@ -1,7 +1,12 @@
 import './style.css';
-import { UPGRADE_URL, PRO_SWATCHES, LONG_TEXT_LIMIT } from './config.js';
+import '@fontsource/schibsted-grotesk/latin-400.css';
+import '@fontsource/schibsted-grotesk/latin-500.css';
+import '@fontsource/schibsted-grotesk/latin-600.css';
+import '@fontsource/schibsted-grotesk/latin-700.css';
+import { UPGRADE_URL, PRO_SWATCHES, LONG_TEXT_LIMIT, QR_SIZE } from './config.js';
 import { mountQr, updateQr, setPreviewColor, downloadPng } from './qr.js';
 import { formatKey, isCompleteKey, verifyKey } from './license.js';
+import { analyze, fileName, MAX_BYTES } from './content.js';
 
 const $ = (id) => document.getElementById(id);
 const input = $('qr-text');
@@ -12,11 +17,14 @@ const ribbon = $('ribbon');
 const btnPng = $('download-png');
 const toast = $('toast');
 const root = document.documentElement;
+const emptyNote = $('empty-note');
+const EMPTY_TEXT = emptyNote.textContent;
 const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)');
 
 // --- Upgrade-Links ---
 $('upgrade-top').href = UPGRADE_URL;
 $('buy-dialog').href = UPGRADE_URL;
+$('mat-caption').textContent = `${QR_SIZE} × ${QR_SIZE} px · PNG`;
 
 // --- Dark/Light ---
 const themeBtn = $('theme-toggle');
@@ -38,15 +46,12 @@ syncThemeLabel();
 mountQr(preview);
 sticker.classList.add('is-empty');
 
-function describe(text) {
-  const n = text.length;
-  const count = `${n} Zeichen`;
-  if (n > LONG_TEXT_LIMIT) return 'Lang. Der Code wird dicht und schwerer scanbar.';
-  if (/^(https?:\/\/)\S+$/i.test(text) || /^(www\.)?[a-z0-9-]+(\.[a-z0-9-]+)*\.[a-z]{2,}(\/\S*)?$/i.test(text)) {
-    return `Link erkannt · ${count}`;
-  }
-  if (/^(mailto:)?[^\s@]+@[^\s@]+\.[^\s@]{2,}$/i.test(text)) return `E-Mail erkannt · ${count}`;
-  return `Text · ${count}`;
+const KIND_LABEL = { link: 'Link erkannt', email: 'E-Mail erkannt', text: 'Text' };
+
+function describe(info, text) {
+  if (info.bytes > MAX_BYTES) return 'Zu lang für einen QR-Code. Kürze den Text etwas.';
+  if (text.length > LONG_TEXT_LIMIT) return 'Lang. Der Code wird dicht und schwerer scanbar.';
+  return `${KIND_LABEL[info.kind]} · ${text.length} Zeichen`;
 }
 
 let landed = false;
@@ -58,15 +63,21 @@ function landSticker() {
 }
 
 // Live-Vorschau: bei jeder Eingabe sofort neu generieren, ohne Animation.
+let current = null;
 input.addEventListener('input', () => {
   const text = input.value.trim();
-  const has = text.length > 0;
-  sticker.classList.toggle('is-empty', !has);
-  btnPng.disabled = !has;
-  status.textContent = has ? describe(text) : ' ';
-  if (has) {
+  const info = text ? analyze(text) : null;
+  const tooLong = !!info && info.bytes > MAX_BYTES;
+  current = info && !tooLong ? info : null;
+  sticker.classList.toggle('is-empty', !current);
+  sticker.classList.toggle('is-error', tooLong);
+  emptyNote.textContent = tooLong ? 'Zu viel Text für einen QR-Code.' : EMPTY_TEXT;
+  status.classList.toggle('is-error', tooLong);
+  btnPng.disabled = !current;
+  status.textContent = info ? describe(info, text) : '\u00a0';
+  if (current) {
     landSticker();
-    updateQr(text);
+    updateQr(current.data);
   }
 });
 
@@ -78,7 +89,8 @@ function showToast(msg) {
   toastTimer = setTimeout(() => toast.classList.remove('is-visible'), 2200);
 }
 btnPng.addEventListener('click', async () => {
-  await downloadPng();
+  if (!current) return;
+  await downloadPng(fileName(current));
   showToast('PNG gespeichert');
 });
 
@@ -143,6 +155,7 @@ swatchBox.addEventListener('click', (e) => {
   if (activeSwatch) activeSwatch.setAttribute('aria-pressed', 'true');
   setPreviewColor(activeSwatch ? activeSwatch.dataset.color : null);
   ribbon.hidden = !activeSwatch || proActive;
+  if (activeSwatch && !proActive) btn.blur();
 });
 
 // --- Freischalten: Schlösser öffnen sich nacheinander ---

@@ -3,8 +3,8 @@
 // TODO: durch den echten Gumroad-Produktlink ersetzen.
 export const UPGRADE_URL = 'https://gumroad.com/l/DEIN-PRODUKT';
 
-// Standardgrösse des Gratis-QR-Codes in Pixeln (Export = Vorschau).
-export const QR_SIZE = 300;
+// Grösse des Gratis-QR-Codes in Pixeln (reicht für ca. 8 cm Druck bei 300 dpi).
+export const QR_SIZE = 1000;
 
 // Farbtupfer im Pro-Bereich. Nur Vorschau auf dem Sticker, der Download bleibt schwarz-weiss.
 export const PRO_SWATCHES = [

@@ -7,9 +7,6 @@
     <title>QR Pro – QR-Codes für Druck und Web</title>
     <meta name="description" content="QR-Codes für Druck und Web. Link eintippen, Code sehen, als PNG herunterladen. Alles läuft in deinem Browser." />
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='5' fill='%232E5E4E'/%3E%3Cg fill='%23fff'%3E%3Crect x='4' y='4' width='4' height='4'/%3E%3Crect x='10' y='4' width='4' height='4'/%3E%3Crect x='16' y='4' width='4' height='4'/%3E%3Crect x='4' y='10' width='4' height='4'/%3E%3Crect x='16' y='10' width='4' height='4'/%3E%3Crect x='10' y='16' width='4' height='4'/%3E%3Crect x='16' y='16' width='4' height='4'/%3E%3C/g%3E%3C/svg%3E" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
     <script>
       // Gespeicherte Farbwahl vor dem ersten Rendern setzen (kein Aufblitzen).
       try {
@@ -80,35 +77,35 @@
           </summary>
 
           <div class="pro__rows">
-            <div class="pro-row" data-locked data-tip="Mit Pro verfügbar">
+            <div class="pro-row" data-locked>
               <span class="pro-row__label">Farben</span>
               <div class="pro-row__control swatches" id="swatches" role="group" aria-label="Farben (Vorschau)"></div>
-              <span class="pro-badge"><svg width="12" height="12" aria-hidden="true"><use href="#i-lock" /></svg>Pro</span>
+              <span class="pro-badge"><svg width="12" height="12" aria-hidden="true"><use href="#i-lock" /></svg><span class="pro-badge__short">Pro</span><span class="pro-badge__hint">Mit Pro verfügbar</span></span>
             </div>
-            <div class="pro-row" data-locked data-tip="Mit Pro verfügbar">
+            <div class="pro-row" data-locked>
               <span class="pro-row__label">Logo</span>
               <div class="pro-row__control">
                 <button type="button" class="logo-drop" data-pro-gate aria-label="Logo hochladen (Pro)">
                   <svg width="22" height="22" aria-hidden="true"><use href="#i-image" /></svg>
                 </button>
               </div>
-              <span class="pro-badge"><svg width="12" height="12" aria-hidden="true"><use href="#i-lock" /></svg>Pro</span>
+              <span class="pro-badge"><svg width="12" height="12" aria-hidden="true"><use href="#i-lock" /></svg><span class="pro-badge__short">Pro</span><span class="pro-badge__hint">Mit Pro verfügbar</span></span>
             </div>
-            <div class="pro-row" data-locked data-tip="Mit Pro verfügbar">
+            <div class="pro-row" data-locked>
               <span class="pro-row__label">Format</span>
               <div class="pro-row__control chips">
                 <button type="button" class="chip" data-pro-gate>PNG gross</button>
                 <button type="button" class="chip" data-pro-gate>SVG</button>
                 <button type="button" class="chip" data-pro-gate>PDF</button>
               </div>
-              <span class="pro-badge"><svg width="12" height="12" aria-hidden="true"><use href="#i-lock" /></svg>Pro</span>
+              <span class="pro-badge"><svg width="12" height="12" aria-hidden="true"><use href="#i-lock" /></svg><span class="pro-badge__short">Pro</span><span class="pro-badge__hint">Mit Pro verfügbar</span></span>
             </div>
-            <div class="pro-row" data-locked data-tip="Mit Pro verfügbar">
+            <div class="pro-row" data-locked>
               <span class="pro-row__label">Mehrere</span>
               <div class="pro-row__control">
                 <button type="button" class="csv-drop" data-pro-gate>Mehrere Codes aus CSV</button>
               </div>
-              <span class="pro-badge"><svg width="12" height="12" aria-hidden="true"><use href="#i-lock" /></svg>Pro</span>
+              <span class="pro-badge"><svg width="12" height="12" aria-hidden="true"><use href="#i-lock" /></svg><span class="pro-badge__short">Pro</span><span class="pro-badge__hint">Mit Pro verfügbar</span></span>
             </div>
           </div>
         </details>
@@ -120,7 +117,7 @@
           <p class="empty-note" id="empty-note">Tipp oben einen Link ein. Dein Code erscheint hier.</p>
           <div class="ribbon" id="ribbon" hidden><span>Pro-Vorschau</span></div>
         </div>
-        <p class="mat__caption">300 × 300 px · PNG</p>
+        <p class="mat__caption" id="mat-caption">1000 × 1000 px · PNG</p>
       </section>
     </main>
 
