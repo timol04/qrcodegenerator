@@ -5,9 +5,12 @@ export const UPGRADE_URL = 'https://gumroad.com/l/DEIN-PRODUKT';
 
 // Grösse des Gratis-QR-Codes in Pixeln (reicht für ca. 8 cm Druck bei 300 dpi).
 export const QR_SIZE = 1000;
+// „PNG gross" (z. B. für Plakate).
+export const QR_SIZE_LARGE = 3000;
 
-// Farbtupfer im Pro-Bereich. Nur Vorschau auf dem Sticker, der Download bleibt schwarz-weiss.
+// Farbtupfer im Pro-Bereich. Muss dunkel genug bleiben, damit der Code scanbar ist.
 export const PRO_SWATCHES = [
+  { name: 'Schwarz', color: '#000000' },
   { name: 'Tannengrün', color: '#1F5C46' },
   { name: 'Tiefblau', color: '#1B4F9C' },
   { name: 'Backsteinrot', color: '#A8321E' },
@@ -17,5 +20,7 @@ export const PRO_SWATCHES = [
 // Ab dieser Länge erscheint der Hinweis, dass der Code dicht wird.
 export const LONG_TEXT_LIMIT = 250;
 
-// Pro-Bereich, Lizenz und Upgrade-Button anzeigen? Vorerst aus (reine Gratis-Version).
-export const PRO_ENABLED = false;
+// Müssen die Gestalten-Funktionen (Farben, Logo, SVG/PDF, CSV) gekauft werden?
+// false = vorerst für alle frei nutzbar, ohne Schloss, Kauf- und Lizenz-Hinweise.
+// true = gesperrt: Farben nur als Vorschau, übrige Funktionen öffnen den Pro-Hinweis.
+export const PRO_REQUIRED = false;

@@ -23,7 +23,9 @@ npm run preview  # gebautes Ergebnis lokal testen
 |---|---|
 | `index.html` | Seitengerüst |
 | `src/config.js` | Upgrade-Link (Gumroad), QR-Grösse, Farbtupfer der Pro-Vorschau |
-| `src/qr.js` | QR-Erzeugung und PNG-Export (hier kommen später Logo/Farben/SVG dazu) |
+| `src/qr.js` | QR-Erzeugung und Export (PNG, SVG, PDF) |
+| `src/content.js` | Erkennt Link/E-Mail/Text, ergänzt https:// und mailto:, Dateinamen |
+| `src/batch.js` | CSV einlesen und ZIP mit vielen Codes erzeugen |
 | `src/main.js` | UI-Logik (Live-Vorschau, Dialoge, Dark Mode, Pro-Vorschau) |
 | `src/license.js` | Schlüssel-Formatierung; die Prüfung ist noch nicht aktiv (TODO Gumroad-API) |
 | `src/style.css` | Styling (responsive) |
@@ -31,9 +33,9 @@ npm run preview  # gebautes Ergebnis lokal testen
 ## Stand
 
 - Gratis-Version: Text/URL → Live-Vorschau, schwarz auf weiss, PNG-Export.
-- Premium-Funktionen (Logo, Farben, SVG/PDF, Batch) sind als gesperrte Elemente sichtbar, aber noch ohne Funktion.
+- Farben, Logo in der Mitte, PNG gross, SVG, PDF und CSV → ZIP funktionieren (vorerst frei, siehe unten).
 - Design nach Design-Brief (Schneidematte, Sticker, Hell/Dunkel). Lizenz-Fenster und Freischalt-Animation sind gestaltet; im Dev-Modus schaltet `AAAA-AAAA-AAAA-AAAA` frei, im Build gibt es noch keine echte Prüfung.
 
 **Vor dem Release:** In `src/config.js` den Platzhalter `UPGRADE_URL` durch den echten Gumroad-Link ersetzen.
 
-**Pro ausgeblendet:** Mit `PRO_ENABLED = false` in `src/config.js` sind Pro-Bereich, Lizenz und Upgrade-Button versteckt (Gratis-Start). Auf `true` setzen, um sie wieder zu zeigen.
+**Gestalten-Funktionen (Farben, Logo, PNG gross/SVG/PDF, CSV → ZIP):** Mit `PRO_REQUIRED = false` in `src/config.js` sind sie für alle frei nutzbar, ohne Schloss und Kaufhinweise. Mit `true` sind sie gesperrt (Farben nur als Vorschau, Rest öffnet den Pro-Hinweis; die Lizenzprüfung ist noch nicht echt).

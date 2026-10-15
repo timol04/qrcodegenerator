@@ -312,7 +312,7 @@ input.mono { font-family: ui-monospace, 'SFMono-Regular', Menlo, Consolas, monos
   .pro-label-full { display: none; }
   .pro-label-short { display: inline; }
   .topbar__nav { gap: 8px; }
-  .link-btn { display: none; }
+  .topbar .link-btn { display: none; }
 
   .app { display: flex; flex-direction: column; gap: 0; padding: 0 0 128px; }
   .panel { display: contents; }
@@ -356,8 +356,14 @@ input.mono { font-family: ui-monospace, 'SFMono-Regular', Menlo, Consolas, monos
 }
 .sticker.is-empty .ribbon { display: none; }
 
-/* Gratis-Version: alles zu Pro ausblenden (PRO_ENABLED in config.js) */
-:root[data-pro='off'] .pro,
-:root[data-pro='off'] #open-license,
-:root[data-pro='off'] #upgrade-top,
-:root[data-pro='off'] .modal { display: none !important; }
+/* Gratis-Modus (PRO_REQUIRED = false): keine Schlösser, kein Kauf- und Lizenz-Hinweis */
+:root[data-pro='free'] #open-license,
+:root[data-pro='free'] #upgrade-top,
+:root[data-pro='free'] .pro-badge,
+:root[data-pro='free'] .modal { display: none !important; }
+:root[data-pro='free'] .pro-row { grid-template-columns: 76px 1fr; }
+.logo-drop { position: relative; overflow: hidden; }
+.logo-drop img { position: absolute; inset: 4px; width: calc(100% - 8px); height: calc(100% - 8px); object-fit: contain; }
+.logo-drop.has-logo svg { display: none; }
+.chip[aria-pressed='true'] { background: var(--btn-bg); color: var(--btn-text); border-color: var(--btn-bg); }
+.chip[aria-pressed='true']:hover { background: var(--btn-bg-hover); }

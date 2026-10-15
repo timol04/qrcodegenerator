@@ -3,8 +3,9 @@ import '@fontsource/schibsted-grotesk/latin-400.css';
 import '@fontsource/schibsted-grotesk/latin-500.css';
 import '@fontsource/schibsted-grotesk/latin-600.css';
 import '@fontsource/schibsted-grotesk/latin-700.css';
-import { UPGRADE_URL, PRO_SWATCHES, LONG_TEXT_LIMIT, QR_SIZE, PRO_ENABLED } from './config.js';
-import { mountQr, updateQr, setPreviewColor, downloadPng } from './qr.js';
+import { UPGRADE_URL, PRO_SWATCHES, LONG_TEXT_LIMIT, PRO_REQUIRED } from './config.js';
+import { mountQr, updateQr, renderBlob, saveBlob, FORMATS } from './qr.js';
+import { buildZip } from './batch.js';
 import { formatKey, isCompleteKey, verifyKey } from './license.js';
 import { analyze, fileName, MAX_BYTES } from './content.js';
 
@@ -21,13 +22,17 @@ const emptyNote = $('empty-note');
 const EMPTY_TEXT = emptyNote.textContent;
 const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)');
 
-// --- Pro ein-/ausblenden (config.js) ---
-root.dataset.pro = PRO_ENABLED ? 'on' : 'off';
+// --- Gratis-Modus (config.js): alles frei nutzbar, ohne Schloss und Kaufhinweise ---
+root.dataset.pro = PRO_REQUIRED ? 'locked' : 'free';
+let proActive = !PRO_REQUIRED;
+if (!PRO_REQUIRED) {
+  $('pro-title').textContent = 'Gestalten';
+  document.querySelectorAll('.pro-row').forEach((row) => row.removeAttribute('data-locked'));
+}
 
 // --- Upgrade-Links ---
 $('upgrade-top').href = UPGRADE_URL;
 $('buy-dialog').href = UPGRADE_URL;
-$('mat-caption').textContent = `${QR_SIZE} × ${QR_SIZE} px · PNG`;
 
 // --- Dark/Light ---
 const themeBtn = $('theme-toggle');
@@ -44,6 +49,19 @@ themeBtn.addEventListener('click', () => {
 });
 darkQuery.addEventListener('change', syncThemeLabel);
 syncThemeLabel();
+
+// --- Stil und Format (Farbe, Logo, Dateiformat) ---
+const style = { color: '#000000', logo: null };
+let format = 'png';
+let current = null; // { kind, data, bytes } oder null, wenn nichts (Gültiges) eingegeben ist
+// Bei gesperrtem Pro gilt für Export nur der Gratis-Stil; die Farbe ist dann reine Vorschau.
+const exportStyle = () => (proActive ? { ...style } : {});
+
+function refresh() {
+  if (current) updateQr(current.data, style);
+  btnPng.textContent = `${FORMATS[format].label} herunterladen`;
+  $('mat-caption').textContent = FORMATS[format].caption;
+}
 
 // --- QR-Code ---
 mountQr(preview);
@@ -66,7 +84,6 @@ function landSticker() {
 }
 
 // Live-Vorschau: bei jeder Eingabe sofort neu generieren, ohne Animation.
-let current = null;
 input.addEventListener('input', () => {
   const text = input.value.trim();
   const info = text ? analyze(text) : null;
@@ -77,10 +94,10 @@ input.addEventListener('input', () => {
   emptyNote.textContent = tooLong ? 'Zu viel Text für einen QR-Code.' : EMPTY_TEXT;
   status.classList.toggle('is-error', tooLong);
   btnPng.disabled = !current;
-  status.textContent = info ? describe(info, text) : '\u00a0';
+  status.textContent = info ? describe(info, text) : ' ';
   if (current) {
     landSticker();
-    updateQr(current.data);
+    refresh();
   }
 });
 
@@ -89,15 +106,26 @@ function showToast(msg) {
   toast.textContent = msg;
   toast.classList.add('is-visible');
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => toast.classList.remove('is-visible'), 2200);
+  toastTimer = setTimeout(() => toast.classList.remove('is-visible'), 2600);
 }
-btnPng.addEventListener('click', async () => {
+
+async function busy(btn, fn) {
+  const label = btn.textContent;
+  btn.disabled = true;
+  try { await fn(); } finally { btn.disabled = btn === btnPng ? !current : false; btn.textContent = label; }
+}
+
+btnPng.addEventListener('click', () => {
   if (!current) return;
-  await downloadPng(fileName(current));
-  showToast('PNG gespeichert');
+  const fmt = format;
+  return busy(btnPng, async () => {
+    const blob = await renderBlob(current.data, fmt, exportStyle());
+    saveBlob(blob, `${fileName(current)}.${FORMATS[fmt].ext}`);
+    showToast(`${FORMATS[fmt].label} gespeichert`);
+  });
 });
 
-// --- Pro-Bereich: auf dem Handy zugeklappt, am Desktop offen ---
+// --- Gestalten-Bereich: auf dem Handy zugeklappt, am Desktop offen ---
 const proDetails = $('pro');
 const wide = matchMedia('(min-width: 900px)');
 proDetails.open = wide.matches;
@@ -111,10 +139,12 @@ for (const d of [proDialog, licenseDialog]) {
   d.addEventListener('click', (e) => { if (e.target === d) d.close(); });
   d.querySelectorAll('[data-close]').forEach((b) => b.addEventListener('click', () => d.close()));
 }
-let proActive = false;
-document.querySelectorAll('[data-pro-gate]').forEach((el) =>
-  el.addEventListener('click', () => { if (!proActive) openDialog(proDialog); })
-);
+// Gesperrte Elemente: Klick öffnet den Pro-Hinweis. Gibt true zurück, wenn gesperrt.
+function gated() {
+  if (proActive) return false;
+  openDialog(proDialog);
+  return true;
+}
 $('have-key').addEventListener('click', () => { proDialog.close(); openLicense(); });
 $('open-license').addEventListener('click', openLicense);
 
@@ -143,31 +173,87 @@ $('license-form').addEventListener('submit', async (e) => {
   else fail('Dieser Schlüssel passt nicht. Prüfe ihn in deiner Gumroad-Mail.');
 });
 
-// --- Farbtupfer: Pro-Vorschau auf dem Sticker (Download bleibt schwarz-weiss) ---
+// --- Farben (gesperrt: nur Vorschau mit Band, der Download bleibt schwarz-weiss) ---
 const swatchBox = $('swatches');
-let activeSwatch = null;
 swatchBox.innerHTML = PRO_SWATCHES.map(
-  (s) => `<button type="button" class="swatch" style="--swatch:${s.color}" data-color="${s.color}" aria-pressed="false" aria-label="${s.name} (Vorschau)"></button>`
+  (s, i) => `<button type="button" class="swatch" style="--swatch:${s.color}" data-color="${s.color}" aria-pressed="${i === 0}" aria-label="${s.name}${PRO_REQUIRED ? ' (Vorschau)' : ''}"></button>`
 ).join('');
+function updateRibbon() {
+  ribbon.hidden = proActive || style.color === '#000000';
+}
 swatchBox.addEventListener('click', (e) => {
   const btn = e.target.closest('.swatch');
   if (!btn) return;
-  const same = activeSwatch === btn;
-  swatchBox.querySelectorAll('.swatch').forEach((b) => b.setAttribute('aria-pressed', 'false'));
-  activeSwatch = same ? null : btn;
-  if (activeSwatch) activeSwatch.setAttribute('aria-pressed', 'true');
-  setPreviewColor(activeSwatch ? activeSwatch.dataset.color : null);
-  ribbon.hidden = !activeSwatch || proActive;
-  if (activeSwatch && !proActive) btn.blur();
+  style.color = btn.dataset.color;
+  swatchBox.querySelectorAll('.swatch').forEach((b) => b.setAttribute('aria-pressed', String(b === btn)));
+  updateRibbon();
+  refresh();
 });
 
-// --- Freischalten: Schlösser öffnen sich nacheinander ---
+// --- Logo ---
+const logoFile = $('logo-file');
+const logoThumb = $('logo-thumb');
+const logoRemove = $('logo-remove');
+const LOGO_MAX_BYTES = 2 * 1024 * 1024;
+$('logo-btn').addEventListener('click', () => { if (!gated()) logoFile.click(); });
+function setLogo(url) {
+  style.logo = url;
+  logoThumb.hidden = !url;
+  logoThumb.src = url ?? '';
+  logoRemove.hidden = !url;
+  $('logo-btn').classList.toggle('has-logo', !!url);
+  refresh();
+}
+logoFile.addEventListener('change', () => {
+  const file = logoFile.files[0];
+  logoFile.value = '';
+  if (!file) return;
+  if (file.size > LOGO_MAX_BYTES) return showToast('Das Logo ist zu gross (maximal 2 MB).');
+  const reader = new FileReader();
+  reader.onload = () => setLogo(reader.result);
+  reader.readAsDataURL(file);
+});
+logoRemove.addEventListener('click', () => setLogo(null));
+
+// --- Format ---
+const formatBox = $('formats');
+formatBox.addEventListener('click', (e) => {
+  const chip = e.target.closest('.chip');
+  if (!chip || (chip.dataset.format !== 'png' && gated())) return;
+  format = chip.dataset.format;
+  formatBox.querySelectorAll('.chip').forEach((c) => c.setAttribute('aria-pressed', String(c === chip)));
+  refresh();
+});
+
+// --- Mehrere Codes aus CSV → ZIP ---
+const csvFile = $('csv-file');
+const csvBtn = $('csv-btn');
+csvBtn.addEventListener('click', () => { if (!gated()) csvFile.click(); });
+csvFile.addEventListener('change', async () => {
+  const file = csvFile.files[0];
+  csvFile.value = '';
+  if (!file) return;
+  csvBtn.disabled = true;
+  const label = csvBtn.textContent;
+  csvBtn.textContent = 'Codes werden erzeugt …';
+  try {
+    const fmt = format === 'pdf' || format === 'svg' || format === 'png-large' ? format : 'png';
+    const { blob, count, skipped } = await buildZip(await file.text(), fmt, exportStyle());
+    saveBlob(blob, 'qr-codes.zip');
+    showToast(`${count} Codes gespeichert${skipped ? `, ${skipped} übersprungen (zu lang oder zu viele)` : ''}`);
+  } catch {
+    showToast('In der Datei steht nichts, woraus ein Code entstehen kann. Eine Zeile pro Code.');
+  } finally {
+    csvBtn.disabled = false;
+    csvBtn.textContent = label;
+  }
+});
+
+// --- Freischalten (nur bei PRO_REQUIRED): Schlösser öffnen sich nacheinander ---
 function unlockPro() {
   proActive = true;
-  ribbon.hidden = true;
-  setPreviewColor(null);
-  swatchBox.querySelectorAll('.swatch').forEach((b) => b.setAttribute('aria-pressed', 'false'));
-  activeSwatch = null;
+  updateRibbon();
+  refresh();
   const rows = [...document.querySelectorAll('.pro-row')];
   rows.forEach((row, i) => {
     row.style.setProperty('--unlock-delay', `${i * 220}ms`);
@@ -184,3 +270,5 @@ function unlockPro() {
     showToast('Pro ist freigeschaltet.');
   }, delay);
 }
+
+refresh();
