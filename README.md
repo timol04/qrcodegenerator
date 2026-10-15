@@ -35,3 +35,5 @@ npm run preview  # gebautes Ergebnis lokal testen
 - Design nach Design-Brief (Schneidematte, Sticker, Hell/Dunkel). Lizenz-Fenster und Freischalt-Animation sind gestaltet; im Dev-Modus schaltet `AAAA-AAAA-AAAA-AAAA` frei, im Build gibt es noch keine echte Prüfung.
 
 **Vor dem Release:** In `src/config.js` den Platzhalter `UPGRADE_URL` durch den echten Gumroad-Link ersetzen.
+
+**Pro ausgeblendet:** Mit `PRO_ENABLED = false` in `src/config.js` sind Pro-Bereich, Lizenz und Upgrade-Button versteckt (Gratis-Start). Auf `true` setzen, um sie wieder zu zeigen.

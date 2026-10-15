@@ -355,3 +355,9 @@ input.mono { font-family: ui-monospace, 'SFMono-Regular', Menlo, Consolas, monos
   *, *::before, *::after { animation: none !important; transition: none !important; }
 }
 .sticker.is-empty .ribbon { display: none; }
+
+/* Gratis-Version: alles zu Pro ausblenden (PRO_ENABLED in config.js) */
+:root[data-pro='off'] .pro,
+:root[data-pro='off'] #open-license,
+:root[data-pro='off'] #upgrade-top,
+:root[data-pro='off'] .modal { display: none !important; }

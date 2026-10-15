@@ -16,3 +16,6 @@ export const PRO_SWATCHES = [
 
 // Ab dieser Länge erscheint der Hinweis, dass der Code dicht wird.
 export const LONG_TEXT_LIMIT = 250;
+
+// Pro-Bereich, Lizenz und Upgrade-Button anzeigen? Vorerst aus (reine Gratis-Version).
+export const PRO_ENABLED = false;

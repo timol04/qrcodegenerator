@@ -3,7 +3,7 @@ import '@fontsource/schibsted-grotesk/latin-400.css';
 import '@fontsource/schibsted-grotesk/latin-500.css';
 import '@fontsource/schibsted-grotesk/latin-600.css';
 import '@fontsource/schibsted-grotesk/latin-700.css';
-import { UPGRADE_URL, PRO_SWATCHES, LONG_TEXT_LIMIT, QR_SIZE } from './config.js';
+import { UPGRADE_URL, PRO_SWATCHES, LONG_TEXT_LIMIT, QR_SIZE, PRO_ENABLED } from './config.js';
 import { mountQr, updateQr, setPreviewColor, downloadPng } from './qr.js';
 import { formatKey, isCompleteKey, verifyKey } from './license.js';
 import { analyze, fileName, MAX_BYTES } from './content.js';
@@ -20,6 +20,9 @@ const root = document.documentElement;
 const emptyNote = $('empty-note');
 const EMPTY_TEXT = emptyNote.textContent;
 const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)');
+
+// --- Pro ein-/ausblenden (config.js) ---
+root.dataset.pro = PRO_ENABLED ? 'on' : 'off';
 
 // --- Upgrade-Links ---
 $('upgrade-top').href = UPGRADE_URL;
