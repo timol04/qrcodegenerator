@@ -22,15 +22,16 @@ npm run preview  # gebautes Ergebnis lokal testen
 | Datei | Zweck |
 |---|---|
 | `index.html` | Seitengerüst |
-| `src/config.js` | Upgrade-Link (Gumroad), QR-Grösse, Liste der Premium-Funktionen |
+| `src/config.js` | Upgrade-Link (Gumroad), QR-Grösse, Farbtupfer der Pro-Vorschau |
 | `src/qr.js` | QR-Erzeugung und PNG-Export (hier kommen später Logo/Farben/SVG dazu) |
-| `src/main.js` | UI-Logik (Live-Vorschau, Buttons) |
+| `src/main.js` | UI-Logik (Live-Vorschau, Dialoge, Dark Mode, Pro-Vorschau) |
+| `src/license.js` | Schlüssel-Formatierung; die Prüfung ist noch nicht aktiv (TODO Gumroad-API) |
 | `src/style.css` | Styling (responsive) |
 
 ## Stand
 
 - Gratis-Version: Text/URL → Live-Vorschau, schwarz auf weiss, PNG-Export.
 - Premium-Funktionen (Logo, Farben, SVG/PDF, Batch) sind als gesperrte Elemente sichtbar, aber noch ohne Funktion.
-- Lizenzschlüssel-Gate: noch nicht umgesetzt.
+- Design nach Design-Brief (Schneidematte, Sticker, Hell/Dunkel). Lizenz-Fenster und Freischalt-Animation sind gestaltet; im Dev-Modus schaltet `AAAA-AAAA-AAAA-AAAA` frei, im Build gibt es noch keine echte Prüfung.
 
 **Vor dem Release:** In `src/config.js` den Platzhalter `UPGRADE_URL` durch den echten Gumroad-Link ersetzen.
