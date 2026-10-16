@@ -78,6 +78,27 @@
 
           <div class="pro__rows">
             <div class="pro-row" data-locked>
+              <span class="pro-row__label">Sticker</span>
+              <div class="pro-row__control chips" id="shapes" role="group" aria-label="Form des Stickers">
+                <button type="button" class="chip" data-shape="square" aria-pressed="true">Quadrat</button>
+                <button type="button" class="chip" data-shape="rounded" aria-pressed="false" data-pro-gate>Abgerundet</button>
+                <button type="button" class="chip" data-shape="round" aria-pressed="false" data-pro-gate>Rund</button>
+              </div>
+              <span class="pro-badge"><svg width="12" height="12" aria-hidden="true"><use href="#i-lock" /></svg><span class="pro-badge__short">Pro</span><span class="pro-badge__hint">Mit Pro verfügbar</span></span>
+            </div>
+            <div class="pro-row" data-locked>
+              <span class="pro-row__label">Text</span>
+              <div class="pro-row__control label-ctl">
+                <input type="text" id="label" class="text-field" maxlength="24" placeholder="z. B. Jetzt scannen" autocomplete="off" aria-label="Beschriftung unter dem Code" data-pro-gate />
+                <div class="chips" id="label-presets">
+                  <button type="button" class="chip chip--small" data-label="Jetzt scannen" data-pro-gate>Jetzt scannen</button>
+                  <button type="button" class="chip chip--small" data-label="Speisekarte" data-pro-gate>Speisekarte</button>
+                  <button type="button" class="chip chip--small" data-label="WLAN" data-pro-gate>WLAN</button>
+                </div>
+              </div>
+              <span class="pro-badge"><svg width="12" height="12" aria-hidden="true"><use href="#i-lock" /></svg><span class="pro-badge__short">Pro</span><span class="pro-badge__hint">Mit Pro verfügbar</span></span>
+            </div>
+            <div class="pro-row" data-locked>
               <span class="pro-row__label">Farben</span>
               <div class="pro-row__control swatches" id="swatches" role="group" aria-label="Farben (Vorschau)"></div>
               <span class="pro-badge"><svg width="12" height="12" aria-hidden="true"><use href="#i-lock" /></svg><span class="pro-badge__short">Pro</span><span class="pro-badge__hint">Mit Pro verfügbar</span></span>
@@ -101,6 +122,17 @@
                 <button type="button" class="chip" data-format="png-large" aria-pressed="false" data-pro-gate>PNG gross</button>
                 <button type="button" class="chip" data-format="svg" aria-pressed="false" data-pro-gate>SVG</button>
                 <button type="button" class="chip" data-format="pdf" aria-pressed="false" data-pro-gate>PDF</button>
+                <button type="button" class="chip" data-format="sheet" aria-pressed="false" data-pro-gate>Stickerbogen</button>
+              </div>
+              <span class="pro-badge"><svg width="12" height="12" aria-hidden="true"><use href="#i-lock" /></svg><span class="pro-badge__short">Pro</span><span class="pro-badge__hint">Mit Pro verfügbar</span></span>
+            </div>
+            <div class="pro-row" id="sheet-row" data-locked hidden>
+              <span class="pro-row__label">Bogen</span>
+              <div class="pro-row__control chips" id="sheet-sizes" role="group" aria-label="Grösse der Sticker auf dem Bogen">
+                <button type="button" class="chip" data-mm="30" aria-pressed="false">3 cm</button>
+                <button type="button" class="chip" data-mm="40" aria-pressed="true">4 cm</button>
+                <button type="button" class="chip" data-mm="60" aria-pressed="false">6 cm</button>
+                <span class="sheet-count" id="sheet-count"></span>
               </div>
               <span class="pro-badge"><svg width="12" height="12" aria-hidden="true"><use href="#i-lock" /></svg><span class="pro-badge__short">Pro</span><span class="pro-badge__hint">Mit Pro verfügbar</span></span>
             </div>
@@ -123,6 +155,7 @@
           <div class="ribbon" id="ribbon" hidden><span>Pro-Vorschau</span></div>
         </div>
         <p class="mat__caption" id="mat-caption">1000 × 1000 px · PNG</p>
+        <p class="scan" id="scan" role="status" aria-live="polite" hidden></p>
       </section>
     </main>
 

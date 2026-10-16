@@ -25,6 +25,7 @@ npm run preview  # gebautes Ergebnis lokal testen
 | `src/config.js` | Upgrade-Link (Gumroad), QR-Grösse, Farbtupfer der Pro-Vorschau |
 | `src/qr.js` | QR-Erzeugung und Export (PNG, SVG, PDF) |
 | `src/content.js` | Erkennt Link/E-Mail/Text, ergänzt https:// und mailto:, Dateinamen |
+| `src/sticker.js` | Sticker-Studio: Form, Beschriftung, SVG-Komposition, Scan-Test mit echtem Decoder |
 | `src/batch.js` | CSV einlesen und ZIP mit vielen Codes erzeugen |
 | `src/main.js` | UI-Logik (Live-Vorschau, Dialoge, Dark Mode, Pro-Vorschau) |
 | `src/license.js` | Schlüssel-Formatierung; die Prüfung ist noch nicht aktiv (TODO Gumroad-API) |
@@ -33,6 +34,7 @@ npm run preview  # gebautes Ergebnis lokal testen
 ## Stand
 
 - Gratis-Version: Text/URL → Live-Vorschau, schwarz auf weiss, PNG-Export.
+- Sticker-Studio: Form (Quadrat, Abgerundet, Rund), Beschriftung, Scan-Test und druckfertiger A4-Stickerbogen mit Schnittlinien.
 - Farben, Logo in der Mitte, PNG gross, SVG, PDF und CSV → ZIP funktionieren (vorerst frei, siehe unten).
 - Design nach Design-Brief (Schneidematte, Sticker, Hell/Dunkel). Lizenz-Fenster und Freischalt-Animation sind gestaltet; im Dev-Modus schaltet `AAAA-AAAA-AAAA-AAAA` frei, im Build gibt es noch keine echte Prüfung.
 

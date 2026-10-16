@@ -236,17 +236,16 @@ input.mono { font-family: ui-monospace, 'SFMono-Regular', Menlo, Consolas, monos
 .mat__caption { color: var(--matte-text); font-size: 13px; }
 
 .sticker {
-  position: relative; background: var(--paper); border-radius: 12px; padding: 16px;
+  position: relative;
   transform: rotate(-1.5deg);
-  box-shadow: var(--sticker-shadow);
-  overflow: hidden;
+  filter: drop-shadow(5px 9px 7px rgba(0, 0, 0, 0.36)) drop-shadow(1px 2px 1px rgba(0, 0, 0, 0.3));
   width: min(100%, 348px);
 }
 .preview { display: flex; line-height: 0; }
 .preview canvas { width: 100% !important; height: auto !important; display: block; }
-.sticker.is-empty .preview { visibility: hidden; }
+.sticker.is-empty .preview { visibility: hidden; aspect-ratio: 1; }
 .sticker .empty-note { display: none; }
-.sticker.is-empty { background: var(--paper); }
+.sticker.is-empty { background: var(--paper); padding: 16px; border-radius: 12px; overflow: hidden; }
 .sticker.is-empty .empty-note {
   display: flex; align-items: center; justify-content: center; text-align: center;
   position: absolute; inset: 16px; padding: 24px;
@@ -268,8 +267,8 @@ input.mono { font-family: ui-monospace, 'SFMono-Regular', Menlo, Consolas, monos
 
 /* Sticker landet: einmalig beim ersten Tippen */
 @keyframes land {
-  from { transform: rotate(-1.5deg) scale(1.05); box-shadow: var(--sticker-shadow-lift); }
-  to { transform: rotate(-1.5deg) scale(1); box-shadow: var(--sticker-shadow); }
+  from { transform: rotate(-1.5deg) scale(1.05); filter: drop-shadow(12px 20px 14px rgba(0, 0, 0, 0.3)) drop-shadow(2px 4px 2px rgba(0, 0, 0, 0.2)); }
+  to { transform: rotate(-1.5deg) scale(1); }
 }
 /* Zu viel Text */
 .sticker.is-error .empty-note { border-color: var(--error); color: #8c1d18; }
@@ -367,3 +366,22 @@ input.mono { font-family: ui-monospace, 'SFMono-Regular', Menlo, Consolas, monos
 .logo-drop.has-logo svg { display: none; }
 .chip[aria-pressed='true'] { background: var(--btn-bg); color: var(--btn-text); border-color: var(--btn-bg); }
 .chip[aria-pressed='true']:hover { background: var(--btn-bg-hover); }
+
+/* Sticker-Studio */
+.text-field {
+  font: inherit; font-size: 16px; color: var(--text); background: var(--surface);
+  border: 1.5px solid var(--line); border-radius: 10px; padding: 0 12px; min-height: 44px; width: 100%; max-width: 280px;
+}
+.text-field:hover { border-color: var(--muted); }
+.text-field:focus-visible { border-color: var(--ring); }
+.label-ctl { flex-direction: column; align-items: flex-start; gap: 8px; }
+.label-ctl .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip--small { min-height: 36px; padding: 0 12px; font-size: 14px; }
+.sheet-count { color: var(--muted); font-size: 13px; margin-left: 4px; }
+.pro-row[hidden] { display: none; }
+.scan {
+  margin: -16px 0 0; max-width: 340px; text-align: center; font-size: 13px; line-height: 1.35;
+  padding: 6px 12px; border-radius: 999px; background: #fff; color: #1f5c46; font-weight: 500;
+}
+.scan[data-level='knapp'] { color: #7a4a00; }
+.scan[data-level='fail'] { color: #8c1d18; }

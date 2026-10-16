@@ -1,14 +1,16 @@
 import QRCodeStyling from 'qr-code-styling';
 import { QR_SIZE, QR_SIZE_LARGE } from './config.js';
+import { composeBlob, composeCanvas, composeSvg, geometry } from './sticker.js';
 
 export const FORMATS = {
-  png: { label: 'PNG', ext: 'png', size: QR_SIZE, caption: `${QR_SIZE} × ${QR_SIZE} px · PNG` },
-  'png-large': { label: 'PNG gross', ext: 'png', size: QR_SIZE_LARGE, caption: `${QR_SIZE_LARGE} × ${QR_SIZE_LARGE} px · PNG` },
+  png: { label: 'PNG', ext: 'png', size: QR_SIZE, caption: `${QR_SIZE} px breit · PNG` },
+  'png-large': { label: 'PNG gross', ext: 'png', size: QR_SIZE_LARGE, caption: `${QR_SIZE_LARGE} px breit · PNG` },
   svg: { label: 'SVG', ext: 'svg', size: QR_SIZE, caption: 'SVG · beliebig skalierbar' },
-  pdf: { label: 'PDF', ext: 'pdf', size: QR_SIZE_LARGE, caption: 'PDF · A4, Code 12 cm' },
+  pdf: { label: 'PDF', ext: 'pdf', size: QR_SIZE_LARGE, caption: 'PDF · A4, Sticker 12 cm breit' },
+  sheet: { label: 'Stickerbogen', ext: 'pdf', size: 800, caption: 'A4 · Stickerbogen mit Schnittlinien' },
 };
 
-/** Stil eines Codes: Farbe der Module und optionales Logo (Data-URL). */
+/** Optionen für qr-code-styling: Farbe der Module und optionales Logo (Data-URL). */
 function options({ data, size, color = '#000000', logo = null }) {
   return {
     width: size,
@@ -26,16 +28,9 @@ function options({ data, size, color = '#000000', logo = null }) {
   };
 }
 
-const qr = new QRCodeStyling(options({ data: ' ', size: QR_SIZE }));
-
-/** Hängt die Vorschau in das übergebene Element ein. */
-export function mountQr(el) {
-  qr.append(el);
-}
-
-/** Aktualisiert die Vorschau (live bei jeder Eingabe oder Stiländerung). */
-export function updateQr(data, style = {}) {
-  qr.update(options({ data, size: QR_SIZE, ...style }));
+/** Nur der QR-Code (ohne Sticker) als Blob. */
+export function codeBlob(data, size, style = {}, type = 'png') {
+  return new QRCodeStyling(options({ data, size, color: style.color, logo: style.logo })).getRawData(type);
 }
 
 function blobToDataUrl(blob) {
@@ -47,16 +42,54 @@ function blobToDataUrl(blob) {
   });
 }
 
+const A4 = { w: 210, h: 297, margin: 10, gap: 5 };
+
+/** Wie viele Sticker passen auf den A4-Bogen? */
+export function sheetInfo(mm, style = {}) {
+  const g = geometry(style.shape, style.label);
+  const h = mm * g.h;
+  const cols = Math.max(1, Math.floor((A4.w - 2 * A4.margin + A4.gap) / (mm + A4.gap)));
+  const rows = Math.max(1, Math.floor((A4.h - 2 * A4.margin + A4.gap) / (h + A4.gap)));
+  return { cols, rows, count: cols * rows, h, g };
+}
+
+async function sheetPdf(data, style) {
+  const { jsPDF } = await import('jspdf');
+  const mm = style.sheetMm ?? 40;
+  const { cols, rows, h, g } = sheetInfo(mm, style);
+  const png = (await composeCanvas(data, 800, style)).toDataURL('image/png');
+  const pdf = new jsPDF({ unit: 'mm', format: 'a4' });
+  const gridW = cols * mm + (cols - 1) * A4.gap;
+  const gridH = rows * h + (rows - 1) * A4.gap;
+  const x0 = (A4.w - gridW) / 2;
+  const y0 = (A4.h - gridH) / 2;
+  pdf.setDrawColor(150);
+  pdf.setLineWidth(0.15);
+  pdf.setLineDashPattern([1, 1], 0);
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      const x = x0 + c * (mm + A4.gap);
+      const y = y0 + r * (h + A4.gap);
+      pdf.addImage(png, 'PNG', x, y, mm, h, 'sticker');
+      // Schnittlinie genau am Rand des Stickers
+      if (g.circle) pdf.circle(x + mm / 2, y + h / 2, mm / 2, 'S');
+      else pdf.roundedRect(x, y, mm, h, g.radius * mm, g.radius * mm, 'S');
+    }
+  }
+  return pdf.output('blob');
+}
+
 /** Erzeugt die Datei (Blob) für einen Inhalt im gewählten Format. */
 export async function renderBlob(data, format, style = {}) {
+  if (format === 'sheet') return sheetPdf(data, style);
   const { size } = FORMATS[format];
-  const code = new QRCodeStyling(options({ data, size, ...style }));
-  if (format === 'svg') return code.getRawData('svg');
-  const png = await code.getRawData('png');
+  if (format === 'svg') return composeSvg(data, size, style);
+  const png = await composeBlob(data, size, style);
   if (format !== 'pdf') return png;
   const { jsPDF } = await import('jspdf');
   const pdf = new jsPDF({ unit: 'mm', format: 'a4' });
-  pdf.addImage(await blobToDataUrl(png), 'PNG', 45, 40, 120, 120);
+  const g = geometry(style.shape, style.label);
+  pdf.addImage(await blobToDataUrl(png), 'PNG', 45, 40, 120, 120 * g.h);
   return pdf.output('blob');
 }
 
