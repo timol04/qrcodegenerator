@@ -29,7 +29,7 @@ npm run preview  # gebautes Ergebnis lokal testen
 | `src/batch.js` | CSV einlesen und ZIP mit vielen Codes erzeugen |
 | `src/main.js` | UI-Logik (Live-Vorschau, Dialoge, Dark Mode, Pro-Vorschau) |
 | `src/license.js` | Schlüssel-Formatierung; Prüfung über die Lemon-Squeezy-Lizenz-API (braucht `LS_PRODUCT_ID`) |
-| `src/i18n.js` | Sprachen Deutsch, Englisch, Spanisch (Texte, Umschalter, gespeicherte Wahl) |
+| `src/i18n.js` | Sprachen Englisch (Standard), Deutsch, Spanisch (Texte, Umschalter, gespeicherte Wahl) |
 | `src/style.css` | Styling (responsive) |
 
 ## Stand

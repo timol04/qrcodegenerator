@@ -1,4 +1,4 @@
-// Sprachen: Deutsch (Standard), Englisch, Spanisch. Texte im HTML tragen data-i18n (Inhalt)
+// Sprachen: Englisch (Standard), Deutsch, Spanisch. Texte im HTML tragen data-i18n (Inhalt)
 // oder data-i18n-attr="attribut:schlüssel; …" (Attribute); Skripte nutzen t().
 export const LANGS = { de: 'Deutsch', en: 'English', es: 'Español' };
 const HTML_LANG = { de: 'de-CH', en: 'en', es: 'es' };
@@ -339,7 +339,7 @@ const dict = {
   },
 };
 
-let lang = 'de';
+let lang = 'en';
 try {
   const saved = localStorage.getItem('qr-lang');
   if (saved && dict[saved]) lang = saved;
