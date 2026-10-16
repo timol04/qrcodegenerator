@@ -21,13 +21,19 @@ const QUIET = 3; // Ruhezone in Modulen
 const FINDER = 7;
 const DOT_OUT = 0.42; // Punkte ausserhalb der Form (Modul-Anteil)
 
-// Einstellungen für Farbe und Kontrast innerhalb der Form
-export const tuning = {
-  bg: 0.9, // Helligkeit des Logo-Hintergrunds (1 = Originalfarben)
-  darkLum: 0.1, // Helligkeit der dunklen Punkte (Logo-Farbe, abgedunkelt)
-  lightMix: 0.9, // Anteil Weiss in den hellen Punkten (Logo-Farbe, aufgehellt)
-  r: 0.48, // Punktgrösse innerhalb der Form
-};
+const lerp = (a, b, t) => a + (b - a) * t;
+
+/** Logo-Stärke 0 (sicher scanbar) bis 1 (kräftiges, grosses Logo) in konkrete Werte übersetzen. */
+export function tuningFor(strength = 0.5) {
+  const t = Math.min(1, Math.max(0, strength));
+  return {
+    bg: lerp(0.7, 1, t), // Helligkeit des Logo-Hintergrunds (1 = Originalfarben)
+    darkLum: lerp(0.05, 0.2, t), // Helligkeit der dunklen Punkte (Logo-Farbe, abgedunkelt)
+    lightMix: lerp(0.94, 0.75, t), // Anteil Weiss in den hellen Punkten
+    r: lerp(0.5, 0.42, t), // Punktgrösse innerhalb der Form
+    fill: lerp(0.78, 1, t), // Anteil der Codefläche, den das Logo ausfüllen darf
+  };
+}
 
 const darkened = ([r, g, b], target) => {
   const f = Math.min(1, target / Math.max(lum(r, g, b), 0.001));
@@ -51,7 +57,8 @@ function buildMatrix(data) {
 }
 
 /** Zeichnet den Code mit Logo-Form auf ein Quadrat der Kantenlänge size. */
-export async function shapeCodeCanvas(data, size, logoUrl, darkColor = '#000000') {
+export async function shapeCodeCanvas(data, size, logoUrl, darkColor = '#000000', strength = 0.5) {
+  const tuning = tuningFor(strength);
   const img = await loadImage(logoUrl);
   const qr = buildMatrix(data);
   const n = qr.getModuleCount();
@@ -94,7 +101,7 @@ export async function shapeCodeCanvas(data, size, logoUrl, darkColor = '#000000'
   wctx.putImageData(px, 0, 0);
   const bw = x1 - x0 + 1;
   const bh = y1 - y0 + 1;
-  const scale = Math.min(area / bw, area / bh);
+  const scale = Math.min(area / bw, area / bh) * tuning.fill;
   const lw = Math.max(1, Math.round(bw * scale));
   const lh = Math.max(1, Math.round(bh * scale));
   const lx = origin + (area - lw) / 2;

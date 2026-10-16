@@ -387,3 +387,8 @@ input.mono { font-family: ui-monospace, 'SFMono-Regular', Menlo, Consolas, monos
 .scan[data-level='fail'] { color: #8c1d18; }
 
 #logo-modes { display: flex; flex-wrap: wrap; gap: 6px; }
+
+.strength { display: flex; align-items: center; gap: 8px; width: 100%; max-width: 300px; font-size: 13px; color: var(--muted); }
+.strength[hidden] { display: none; }
+.strength input[type='range'] { flex: 1; min-width: 0; accent-color: var(--matte); height: 44px; }
+.strength__end { flex: none; }

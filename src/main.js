@@ -52,7 +52,7 @@ darkQuery.addEventListener('change', syncThemeLabel);
 syncThemeLabel();
 
 // --- Stil und Format (Farbe, Logo, Form, Beschriftung, Dateiformat) ---
-const style = { color: '#000000', logo: null, logoMode: 'shape', dots: 'rounded', shape: 'square', label: '', sheetMm: 40 };
+const style = { color: '#000000', logo: null, logoMode: 'shape', logoStrength: 0.5, dots: 'rounded', shape: 'square', label: '', sheetMm: 40 };
 let format = 'png';
 let current = null; // { kind, data, bytes } oder null, wenn nichts (Gültiges) eingegeben ist
 // Bei gesperrtem Pro gilt für Export nur der Gratis-Stil; Farbe und Vorschau sind dann reine Vorschau.
@@ -237,6 +237,7 @@ function setLogo(url) {
   logoThumb.src = url ?? '';
   logoRemove.hidden = !url;
   $('logo-modes').hidden = !url;
+  syncStrengthRow();
   $('logo-btn').classList.toggle('has-logo', !!url);
   refresh();
 }
@@ -249,11 +250,19 @@ logoFile.addEventListener('change', () => {
   reader.onload = () => setLogo(reader.result);
   reader.readAsDataURL(file);
 });
+function syncStrengthRow() {
+  $('logo-strength-row').hidden = !style.logo || style.logoMode !== 'shape';
+}
+$('logo-strength').addEventListener('input', (e) => {
+  style.logoStrength = Number(e.target.value) / 100;
+  refresh();
+});
 logoRemove.addEventListener('click', () => setLogo(null));
 $('logo-modes').addEventListener('click', (e) => {
   const chip = e.target.closest('.chip');
   if (!chip) return;
   style.logoMode = chip.dataset.logomode;
+  syncStrengthRow();
   $('logo-modes').querySelectorAll('.chip').forEach((c) => c.setAttribute('aria-pressed', String(c === chip)));
   refresh();
 });

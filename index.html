@@ -124,6 +124,11 @@
                   <button type="button" class="chip chip--small" data-logomode="shape" aria-pressed="true">Als Form</button>
                   <button type="button" class="chip chip--small" data-logomode="center" aria-pressed="false">In der Mitte</button>
                 </div>
+                <label class="strength" id="logo-strength-row" hidden>
+                  <span class="strength__end">sicher</span>
+                  <input type="range" id="logo-strength" min="0" max="100" value="50" aria-label="Logo-Stärke: von sicher scanbar bis kräftiges Logo" />
+                  <span class="strength__end">kräftig</span>
+                </label>
                 <button type="button" class="link-btn" id="logo-remove" hidden>Logo entfernen</button>
                 <input type="file" id="logo-file" accept="image/png,image/jpeg,image/svg+xml,image/webp" hidden />
               </div>
