@@ -385,3 +385,5 @@ input.mono { font-family: ui-monospace, 'SFMono-Regular', Menlo, Consolas, monos
 }
 .scan[data-level='knapp'] { color: #7a4a00; }
 .scan[data-level='fail'] { color: #8c1d18; }
+
+#logo-modes { display: flex; flex-wrap: wrap; gap: 6px; }

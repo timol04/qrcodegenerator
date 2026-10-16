@@ -35,7 +35,7 @@ npm run preview  # gebautes Ergebnis lokal testen
 
 - Gratis-Version: Text/URL → Live-Vorschau, schwarz auf weiss, PNG-Export.
 - Sticker-Studio: Form (Quadrat, Abgerundet, Rund), Beschriftung, Scan-Test und druckfertiger A4-Stickerbogen mit Schnittlinien.
-- Punktform (Weich, Rund, Elegant, Eckig), Farben und Farbverläufe, Logo in der Mitte, PNG gross, SVG, PDF und CSV → ZIP funktionieren (vorerst frei, siehe unten).
+- Punktform (Weich, Rund, Elegant, Eckig), Farben und Farbverläufe, Logo als Form (Punkte bilden das Logo, mit Scan-Test) oder in der Mitte, Logo in der Mitte, PNG gross, SVG, PDF und CSV → ZIP funktionieren (vorerst frei, siehe unten).
 - Design nach Design-Brief (Schneidematte, Sticker, Hell/Dunkel). Lizenz-Fenster und Freischalt-Animation sind gestaltet; im Dev-Modus schaltet `AAAA-AAAA-AAAA-AAAA` frei, im Build gibt es noch keine echte Prüfung.
 
 **Vor dem Release:** In `src/config.js` den Platzhalter `UPGRADE_URL` durch den echten Gumroad-Link ersetzen.

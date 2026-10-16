@@ -52,7 +52,7 @@ darkQuery.addEventListener('change', syncThemeLabel);
 syncThemeLabel();
 
 // --- Stil und Format (Farbe, Logo, Form, Beschriftung, Dateiformat) ---
-const style = { color: '#000000', logo: null, dots: 'rounded', shape: 'square', label: '', sheetMm: 40 };
+const style = { color: '#000000', logo: null, logoMode: 'shape', dots: 'rounded', shape: 'square', label: '', sheetMm: 40 };
 let format = 'png';
 let current = null; // { kind, data, bytes } oder null, wenn nichts (Gültiges) eingegeben ist
 // Bei gesperrtem Pro gilt für Export nur der Gratis-Stil; Farbe und Vorschau sind dann reine Vorschau.
@@ -236,6 +236,7 @@ function setLogo(url) {
   logoThumb.hidden = !url;
   logoThumb.src = url ?? '';
   logoRemove.hidden = !url;
+  $('logo-modes').hidden = !url;
   $('logo-btn').classList.toggle('has-logo', !!url);
   refresh();
 }
@@ -249,6 +250,13 @@ logoFile.addEventListener('change', () => {
   reader.readAsDataURL(file);
 });
 logoRemove.addEventListener('click', () => setLogo(null));
+$('logo-modes').addEventListener('click', (e) => {
+  const chip = e.target.closest('.chip');
+  if (!chip) return;
+  style.logoMode = chip.dataset.logomode;
+  $('logo-modes').querySelectorAll('.chip').forEach((c) => c.setAttribute('aria-pressed', String(c === chip)));
+  refresh();
+});
 
 // --- Punktform (Gratis-Stil bleibt Weich) ---
 const dotBox = $('dot-styles');

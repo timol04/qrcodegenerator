@@ -1,5 +1,6 @@
 import QRCodeStyling from 'qr-code-styling';
 import { QR_SIZE, QR_SIZE_LARGE } from './config.js';
+import { shapeCodeCanvas } from './logoshape.js';
 import { composeBlob, composeCanvas, composeSvg, geometry } from './sticker.js';
 
 export const FORMATS = {
@@ -42,7 +43,16 @@ function options({ data, size, color = '#000000', logo = null, dots = 'rounded' 
 }
 
 /** Nur der QR-Code (ohne Sticker) als Blob. */
-export function codeBlob(data, size, style = {}, type = 'png') {
+export async function codeBlob(data, size, style = {}, type = 'png') {
+  if (style.logo && style.logoMode === 'shape') {
+    const dark = Array.isArray(style.color) ? style.color[0] : style.color;
+    const canvas = await shapeCodeCanvas(data, size, style.logo, dark);
+    const png = await new Promise((resolve) => canvas.toBlob(resolve, 'image/png'));
+    if (type !== 'svg') return png;
+    // Logo-Form ist ein Pixelbild; für SVG wird es eingebettet
+    const url = await blobToDataUrl(png);
+    return new Blob([`<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}"><image href="${url}" width="${size}" height="${size}"/></svg>`], { type: 'image/svg+xml' });
+  }
   return new QRCodeStyling(options({ data, size, color: style.color, logo: style.logo, dots: style.dots })).getRawData(type);
 }
 
