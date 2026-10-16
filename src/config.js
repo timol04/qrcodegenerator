@@ -15,6 +15,11 @@ export const PRO_SWATCHES = [
   { name: 'Tiefblau', color: '#1B4F9C' },
   { name: 'Backsteinrot', color: '#A8321E' },
   { name: 'Aubergine', color: '#5B2A4E' },
+  // Verläufe über alle Punkte: zwei Farben, beide dunkel genug zum Scannen
+  { name: 'Wald bis Ozean', color: ['#1E7A4C', '#1B4F9C'] },
+  { name: 'Ozean', color: ['#0B7BA8', '#1B3A8C'] },
+  { name: 'Abendrot', color: ['#C2410C', '#7B2A85'] },
+  { name: 'Beere', color: ['#B0286B', '#4B2A8C'] },
 ];
 
 // Ab dieser Länge erscheint der Hinweis, dass der Code dicht wird.

@@ -52,7 +52,7 @@ darkQuery.addEventListener('change', syncThemeLabel);
 syncThemeLabel();
 
 // --- Stil und Format (Farbe, Logo, Form, Beschriftung, Dateiformat) ---
-const style = { color: '#000000', logo: null, dots: 'dots', shape: 'square', label: '', sheetMm: 40 };
+const style = { color: '#000000', logo: null, dots: 'rounded', shape: 'square', label: '', sheetMm: 40 };
 let format = 'png';
 let current = null; // { kind, data, bytes } oder null, wenn nichts (Gültiges) eingegeben ist
 // Bei gesperrtem Pro gilt für Export nur der Gratis-Stil; Farbe und Vorschau sind dann reine Vorschau.
@@ -209,8 +209,9 @@ $('license-form').addEventListener('submit', async (e) => {
 
 // --- Farben (gesperrt: nur Vorschau mit Band, der Download bleibt schwarz-weiss) ---
 const swatchBox = $('swatches');
+const swatchCss = (c) => (Array.isArray(c) ? `linear-gradient(135deg, ${c[0]}, ${c[1]})` : c);
 swatchBox.innerHTML = PRO_SWATCHES.map(
-  (s, i) => `<button type="button" class="swatch" style="--swatch:${s.color}" data-color="${s.color}" aria-pressed="${i === 0}" aria-label="${s.name}${PRO_REQUIRED ? ' (Vorschau)' : ''}"></button>`
+  (s, i) => `<button type="button" class="swatch" style="--swatch:${swatchCss(s.color)}" data-i="${i}" aria-pressed="${i === 0}" aria-label="${s.name}${PRO_REQUIRED ? ' (Vorschau)' : ''}"></button>`
 ).join('');
 function updateRibbon() {
   ribbon.hidden = proActive || style.color === '#000000';
@@ -218,7 +219,7 @@ function updateRibbon() {
 swatchBox.addEventListener('click', (e) => {
   const btn = e.target.closest('.swatch');
   if (!btn) return;
-  style.color = btn.dataset.color;
+  style.color = PRO_SWATCHES[Number(btn.dataset.i)].color;
   swatchBox.querySelectorAll('.swatch').forEach((b) => b.setAttribute('aria-pressed', String(b === btn)));
   updateRibbon();
   refresh();
@@ -249,11 +250,11 @@ logoFile.addEventListener('change', () => {
 });
 logoRemove.addEventListener('click', () => setLogo(null));
 
-// --- Punktform (Gratis-Stil bleibt Rund) ---
+// --- Punktform (Gratis-Stil bleibt Weich) ---
 const dotBox = $('dot-styles');
 dotBox.addEventListener('click', (e) => {
   const chip = e.target.closest('.chip');
-  if (!chip || (chip.dataset.dots !== 'dots' && gated())) return;
+  if (!chip || (chip.dataset.dots !== 'rounded' && gated())) return;
   style.dots = chip.dataset.dots;
   dotBox.querySelectorAll('.chip').forEach((c) => c.setAttribute('aria-pressed', String(c === chip)));
   refresh();

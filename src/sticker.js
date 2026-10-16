@@ -60,7 +60,7 @@ export async function composeCanvas(data, w, style = {}) {
     const maxW = g.label.maxW * w;
     const measured = ctx.measureText(label).width;
     if (measured > maxW) { fs *= maxW / measured; ctx.font = `700 ${fs}px ${FONT}`; }
-    ctx.fillStyle = color;
+    ctx.fillStyle = Array.isArray(color) ? color[0] : color;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillText(label, w / 2, g.label.cy * w);
@@ -91,7 +91,7 @@ export async function composeSvg(data, w, style = {}) {
     : `<rect width="${w}" height="${h}" rx="${g.radius * w}" fill="#fff"/>`;
   const esc = (t) => t.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
   const text = g.label
-    ? `<text x="${w / 2}" y="${g.label.cy * w}" text-anchor="middle" dominant-baseline="central" font-family="Schibsted Grotesk, Arial, sans-serif" font-weight="700" font-size="${g.label.fs * w}" fill="${color}" textLength="${Math.min(label.length * g.label.fs * w * 0.55, g.label.maxW * w)}" lengthAdjust="spacingAndGlyphs">${esc(label)}</text>`
+    ? `<text x="${w / 2}" y="${g.label.cy * w}" text-anchor="middle" dominant-baseline="central" font-family="Schibsted Grotesk, Arial, sans-serif" font-weight="700" font-size="${g.label.fs * w}" fill="${Array.isArray(color) ? color[0] : color}" textLength="${Math.min(label.length * g.label.fs * w * 0.55, g.label.maxW * w)}" lengthAdjust="spacingAndGlyphs">${esc(label)}</text>`
     : '';
   const svg = `<?xml version="1.0" standalone="no"?>\n<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">${bg}${new XMLSerializer().serializeToString(inner)}${text}</svg>`;
   return new Blob([svg], { type: 'image/svg+xml' });

@@ -12,15 +12,19 @@ export const FORMATS = {
 
 /** Punktformen: Form der Module und passend dazu die Form der drei Eck-Markierungen. */
 export const DOT_STYLES = {
-  dots: { label: 'Rund', dots: 'dots', eye: 'square', eyeDot: 'dot' },
   rounded: { label: 'Weich', dots: 'rounded', eye: 'square', eyeDot: 'dot' },
+  dots: { label: 'Rund', dots: 'dots', eye: 'square', eyeDot: 'dot' },
   classy: { label: 'Elegant', dots: 'classy-rounded', eye: 'square', eyeDot: 'dot' },
   square: { label: 'Eckig', dots: 'square', eye: 'square', eyeDot: 'square' },
 };
 
 /** Optionen für qr-code-styling: Farbe der Module und optionales Logo (Data-URL). */
-function options({ data, size, color = '#000000', logo = null, dots = 'dots' }) {
-  const d = DOT_STYLES[dots] ?? DOT_STYLES.dots;
+function options({ data, size, color = '#000000', logo = null, dots = 'rounded' }) {
+  const d = DOT_STYLES[dots] ?? DOT_STYLES.rounded;
+  // color: ein Hex-Wert oder [von, bis] für einen Verlauf über den ganzen Code
+  const paint = Array.isArray(color)
+    ? { gradient: { type: 'linear', rotation: Math.PI / 4, colorStops: [{ offset: 0, color: color[0] }, { offset: 1, color: color[1] }] } }
+    : { color };
   return {
     width: size,
     height: size,
@@ -28,9 +32,9 @@ function options({ data, size, color = '#000000', logo = null, dots = 'dots' }) 
     data,
     // Mit Logo in der Mitte braucht der Code mehr Fehlerkorrektur, damit er scanbar bleibt.
     qrOptions: { errorCorrectionLevel: logo ? 'H' : 'M' },
-    dotsOptions: { color, type: d.dots },
-    cornersSquareOptions: { color, type: d.eye },
-    cornersDotOptions: { color, type: d.eyeDot },
+    dotsOptions: { ...paint, type: d.dots },
+    cornersSquareOptions: { ...paint, type: d.eye },
+    cornersDotOptions: { ...paint, type: d.eyeDot },
     backgroundOptions: { color: '#ffffff' },
     image: logo || undefined,
     imageOptions: { hideBackgroundDots: true, imageSize: 0.26, margin: Math.round(size * 0.01), crossOrigin: 'anonymous' },
