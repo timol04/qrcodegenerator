@@ -5,7 +5,8 @@ import '@fontsource/schibsted-grotesk/latin-600.css';
 import '@fontsource/schibsted-grotesk/latin-700.css';
 import { UPGRADE_URL, PRO_SWATCHES, LONG_TEXT_LIMIT, PRO_REQUIRED } from './config.js';
 import { renderBlob, saveBlob, sheetInfo, pagePreview, FORMATS } from './qr.js';
-import { composeCanvas, scanTest, geometry, SCAN_TEXT } from './sticker.js';
+import { composeCanvas, scanTest, geometry } from './sticker.js';
+import { t, applyI18n, setLang, getLang, onLangChange } from './i18n.js';
 import { buildZip } from './batch.js';
 import { formatKey, isCompleteKey, verifyKey } from './license.js';
 import { analyze, fileName, MAX_BYTES } from './content.js';
@@ -20,14 +21,13 @@ const btnPng = $('download-png');
 const toast = $('toast');
 const root = document.documentElement;
 const emptyNote = $('empty-note');
-const EMPTY_TEXT = emptyNote.textContent;
 const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)');
 
 // --- Gratis-Modus (config.js): alles frei nutzbar, ohne Schloss und Kaufhinweise ---
 root.dataset.pro = PRO_REQUIRED ? 'locked' : 'free';
 let proActive = !PRO_REQUIRED;
 if (!PRO_REQUIRED) {
-  $('pro-title').textContent = 'Gestalten';
+  $('pro-title').dataset.i18n = 'pro.titleFree';
   document.querySelectorAll('.pro-row').forEach((row) => row.removeAttribute('data-locked'));
 }
 
@@ -40,7 +40,7 @@ const themeBtn = $('theme-toggle');
 const darkQuery = matchMedia('(prefers-color-scheme: dark)');
 const isDark = () => (root.dataset.theme ? root.dataset.theme === 'dark' : darkQuery.matches);
 function syncThemeLabel() {
-  themeBtn.setAttribute('aria-label', isDark() ? 'Helles Design einschalten' : 'Dunkles Design einschalten');
+  themeBtn.setAttribute('aria-label', isDark() ? t('theme.toLight') : t('theme.toDark'));
 }
 themeBtn.addEventListener('click', () => {
   const next = isDark() ? 'light' : 'dark';
@@ -63,23 +63,25 @@ const scanEl = $('scan');
 let renderId = 0;
 let scanTimer;
 
+const fmtLabel = (f) => t(`fmt.${f}`);
+
 function captionText() {
   const f = FORMATS[format];
   if (format === 'sheet') {
     const { count } = sheetInfo(style.sheetMm, exportStyle());
-    return `A4 · ${count} Sticker à ${style.sheetMm / 10} cm, mit Schnittlinien`;
+    return t('cap.sheet', { count, cm: style.sheetMm / 10 });
   }
   if (format === 'png' || format === 'png-large') {
     const h = Math.round(f.size * geometry(exportStyle().shape, exportStyle().label).h);
-    return `${f.size} × ${h} px · PNG`;
+    return t('cap.png', { w: f.size, h });
   }
-  return f.caption;
+  return t(`cap.${format}`);
 }
 
 async function refresh() {
-  btnPng.textContent = `${FORMATS[format].label} herunterladen`;
+  btnPng.textContent = t('dl.btn', { format: fmtLabel(format) });
   $('mat-caption').textContent = captionText();
-  $('sheet-count').textContent = format === 'sheet' ? `${sheetInfo(style.sheetMm, exportStyle()).count} pro Seite` : '';
+  $('sheet-count').textContent = format === 'sheet' ? t('sheet.perPage', { n: sheetInfo(style.sheetMm, exportStyle()).count }) : '';
   const id = ++renderId;
   clearTimeout(scanTimer);
   if (!current) return;
@@ -97,19 +99,19 @@ async function refresh() {
     if (id !== renderId) return;
     scanEl.hidden = false;
     scanEl.dataset.level = level;
-    scanEl.textContent = SCAN_TEXT[level];
+    scanEl.dataset.level = level;
+    scanEl.textContent = t(`scan.${level}`);
   }, 150);
 }
 
 // --- QR-Code ---
 sticker.classList.add('is-empty');
 
-const KIND_LABEL = { link: 'Link erkannt', email: 'E-Mail erkannt', text: 'Text' };
-
+let lastInfo = null;
 function describe(info, text) {
-  if (info.bytes > MAX_BYTES) return 'Zu lang für einen QR-Code. Kürze den Text etwas.';
-  if (text.length > LONG_TEXT_LIMIT) return 'Lang. Der Code wird dicht und schwerer scanbar.';
-  return `${KIND_LABEL[info.kind]} · ${text.length} Zeichen`;
+  if (info.bytes > MAX_BYTES) return t('status.tooLong');
+  if (text.length > LONG_TEXT_LIMIT) return t('status.long');
+  return t('status.chars', { kind: t(`kind.${info.kind}`), n: text.length });
 }
 
 let landed = false;
@@ -125,9 +127,11 @@ input.addEventListener('input', () => {
   const text = input.value.trim();
   const info = text ? analyze(text) : null;
   const tooLong = !!info && info.bytes > MAX_BYTES;
+  lastInfo = info ? { info, text } : null;
   current = info && !tooLong ? info : null;
   sticker.classList.toggle('is-error', tooLong);
-  emptyNote.textContent = tooLong ? 'Zu viel Text für einen QR-Code.' : EMPTY_TEXT;
+  emptyNote.dataset.i18n = tooLong ? 'mat.tooMuch' : 'mat.empty';
+  emptyNote.textContent = t(emptyNote.dataset.i18n);
   status.classList.toggle('is-error', tooLong);
   btnPng.disabled = !current;
   status.textContent = info ? describe(info, text) : '\u00a0';
@@ -158,7 +162,7 @@ btnPng.addEventListener('click', () => {
   return busy(btnPng, async () => {
     const blob = await renderBlob(current.data, fmt, exportStyle());
     saveBlob(blob, `${fileName(current)}.${FORMATS[fmt].ext}`);
-    showToast(`${FORMATS[fmt].label} gespeichert`);
+    showToast(t('dl.done', { format: fmtLabel(fmt) }));
   });
 });
 
@@ -188,7 +192,7 @@ $('open-license').addEventListener('click', openLicense);
 const keyInput = $('license-key');
 const keyMsg = $('license-msg');
 function openLicense() {
-  if (proActive) { showToast('Pro ist freigeschaltet.'); return; }
+  if (proActive) { showToast(t('lic.already')); return; }
   keyMsg.textContent = ' ';
   keyMsg.classList.remove('is-error');
   openDialog(licenseDialog);
@@ -203,18 +207,18 @@ $('license-form').addEventListener('submit', async (e) => {
   e.preventDefault();
   const key = keyInput.value;
   const fail = (msg) => { keyMsg.textContent = msg; keyMsg.classList.add('is-error'); };
-  if (!isCompleteKey(key)) return fail('Dieser Schlüssel passt nicht. Prüfe ihn in deiner Gumroad-Mail.');
+  if (!isCompleteKey(key)) return fail(t('lic.invalid'));
   const result = await verifyKey(key);
   if (result === 'ok') { licenseDialog.close(); unlockPro(); }
-  else if (result === 'unavailable') fail('Die Schlüsselprüfung ist noch nicht aktiv.');
-  else fail('Dieser Schlüssel passt nicht. Prüfe ihn in deiner Gumroad-Mail.');
+  else if (result === 'unavailable') fail(t('lic.unavailable'));
+  else fail(t('lic.invalid'));
 });
 
 // --- Farben (gesperrt: nur Vorschau mit Band, der Download bleibt schwarz-weiss) ---
 const swatchBox = $('swatches');
 const swatchCss = (c) => (Array.isArray(c) ? `linear-gradient(135deg, ${c[0]}, ${c[1]})` : c);
 swatchBox.innerHTML = PRO_SWATCHES.map(
-  (s, i) => `<button type="button" class="swatch" style="--swatch:${swatchCss(s.color)}" data-i="${i}" aria-pressed="${i === 0}" aria-label="${s.name}${PRO_REQUIRED ? ' (Vorschau)' : ''}"></button>`
+  (s, i) => `<button type="button" class="swatch" style="--swatch:${swatchCss(s.color)}" data-i="${i}" aria-pressed="${i === 0}" aria-label="${t('sw.' + s.name)}${PRO_REQUIRED ? ` (${t('colors.preview')})` : ''}"></button>`
 ).join('');
 function updateRibbon() {
   ribbon.hidden = proActive || style.color === '#000000';
@@ -248,7 +252,7 @@ logoFile.addEventListener('change', () => {
   const file = logoFile.files[0];
   logoFile.value = '';
   if (!file) return;
-  if (file.size > LOGO_MAX_BYTES) return showToast('Das Logo ist zu gross (maximal 2 MB).');
+  if (file.size > LOGO_MAX_BYTES) return showToast(t('logo.tooBig'));
   const reader = new FileReader();
   reader.onload = () => setLogo(reader.result);
   reader.readAsDataURL(file);
@@ -295,7 +299,7 @@ labelInput.addEventListener('input', () => { style.label = labelInput.value.trim
 $('label-presets').addEventListener('click', (e) => {
   const chip = e.target.closest('.chip');
   if (!chip || gated()) return;
-  labelInput.value = style.label = chip.dataset.label;
+  labelInput.value = style.label = chip.textContent;
   refresh();
 });
 
@@ -329,18 +333,17 @@ csvFile.addEventListener('change', async () => {
   csvFile.value = '';
   if (!file) return;
   csvBtn.disabled = true;
-  const label = csvBtn.textContent;
-  csvBtn.textContent = 'Codes werden erzeugt …';
+  csvBtn.textContent = t('batch.busy');
   try {
     const fmt = ['pdf', 'svg', 'png-large'].includes(format) ? format : 'png';
     const { blob, count, skipped } = await buildZip(await file.text(), fmt, exportStyle());
     saveBlob(blob, 'qr-codes.zip');
-    showToast(`${count} Codes gespeichert${skipped ? `, ${skipped} übersprungen (zu lang oder zu viele)` : ''}`);
+    showToast(t('batch.done', { n: count }) + (skipped ? t('batch.skipped', { n: skipped }) : ''));
   } catch {
-    showToast('In der Datei steht nichts, woraus ein Code entstehen kann. Eine Zeile pro Code.');
+    showToast(t('batch.empty'));
   } finally {
     csvBtn.disabled = false;
-    csvBtn.textContent = label;
+    csvBtn.textContent = t('batch.btn');
   }
 });
 
@@ -360,10 +363,30 @@ function unlockPro() {
     const label = $('upgrade-top');
     label.removeAttribute('href');
     label.classList.add('is-active');
-    label.querySelector('.pro-label-full').textContent = 'Pro aktiv';
-    label.querySelector('.pro-label-short').textContent = 'Pro aktiv';
-    showToast('Pro ist freigeschaltet.');
+    label.querySelector('.pro-label-full').dataset.i18n = 'nav.active';
+    label.querySelector('.pro-label-short').dataset.i18n = 'nav.active';
+    applyI18n();
+    showToast(t('lic.unlocked'));
   }, delay);
 }
 
+// --- Sprache ---
+const langSelect = $('lang-select');
+langSelect.value = getLang();
+langSelect.addEventListener('change', () => setLang(langSelect.value));
+function renderSwatchLabels() {
+  swatchBox.querySelectorAll('.swatch').forEach((b) => {
+    b.setAttribute('aria-label', t('sw.' + PRO_SWATCHES[Number(b.dataset.i)].name) + (PRO_REQUIRED ? ` (${t('colors.preview')})` : ''));
+  });
+}
+onLangChange(() => {
+  syncThemeLabel();
+  renderSwatchLabels();
+  if (lastInfo) status.textContent = describe(lastInfo.info, lastInfo.text);
+  const level = scanEl.dataset.level;
+  if (!scanEl.hidden && level) scanEl.textContent = t(`scan.${level}`);
+  refresh();
+});
+applyI18n();
+syncThemeLabel();
 refresh();

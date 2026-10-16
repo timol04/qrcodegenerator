@@ -6,17 +6,17 @@ import { composeBlob, composeCanvas, composeSvg, geometry } from './sticker.js';
 export const FORMATS = {
   png: { label: 'PNG', ext: 'png', size: QR_SIZE, caption: `${QR_SIZE} px breit · PNG` },
   'png-large': { label: 'PNG gross', ext: 'png', size: QR_SIZE_LARGE, caption: `${QR_SIZE_LARGE} px breit · PNG` },
-  svg: { label: 'SVG', ext: 'svg', size: QR_SIZE, caption: 'SVG · beliebig skalierbar' },
-  pdf: { label: 'PDF', ext: 'pdf', size: QR_SIZE_LARGE, caption: 'PDF · A4, Sticker 12 cm breit' },
-  sheet: { label: 'Stickerbogen', ext: 'pdf', size: 800, caption: 'A4 · Stickerbogen mit Schnittlinien' },
+  svg: { ext: 'svg', size: QR_SIZE },
+  pdf: { ext: 'pdf', size: QR_SIZE_LARGE },
+  sheet: { ext: 'pdf', size: 800 },
 };
 
 /** Punktformen: Form der Module und passend dazu die Form der drei Eck-Markierungen. */
 export const DOT_STYLES = {
-  rounded: { label: 'Weich', dots: 'rounded', eye: 'square', eyeDot: 'dot' },
-  dots: { label: 'Rund', dots: 'dots', eye: 'square', eyeDot: 'dot' },
-  classy: { label: 'Elegant', dots: 'classy-rounded', eye: 'square', eyeDot: 'dot' },
-  square: { label: 'Eckig', dots: 'square', eye: 'square', eyeDot: 'square' },
+  rounded: { dots: 'rounded', eye: 'square', eyeDot: 'dot' },
+  dots: { dots: 'dots', eye: 'square', eyeDot: 'dot' },
+  classy: { dots: 'classy-rounded', eye: 'square', eyeDot: 'dot' },
+  square: { dots: 'square', eye: 'square', eyeDot: 'square' },
 };
 
 /** Optionen für qr-code-styling: Farbe der Module und optionales Logo (Data-URL). */

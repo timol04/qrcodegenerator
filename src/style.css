@@ -102,6 +102,17 @@ h1, h2, p { margin: 0; }
 }
 .icon-btn:hover { background: var(--panel); }
 .icon-btn:active { transform: translateY(1px); }
+.lang {
+  position: relative; display: inline-flex; align-items: center; gap: 6px; height: 44px; padding: 0 10px;
+  border: 1px solid var(--line); border-radius: 10px; color: var(--text); cursor: pointer;
+}
+.lang:hover { background: var(--panel); }
+.lang:focus-within { outline: 2px solid var(--accent, currentColor); outline-offset: 2px; }
+.lang select {
+  appearance: none; -webkit-appearance: none; background: none; border: 0; padding: 0 2px; margin: 0;
+  font: inherit; font-weight: 600; color: inherit; cursor: pointer; outline: 0;
+}
+.lang select option { color: initial; }
 .icon-moon { display: none; }
 :root[data-theme='dark'] .icon-sun { display: none; }
 :root[data-theme='dark'] .icon-moon { display: block; }

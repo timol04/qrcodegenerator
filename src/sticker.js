@@ -121,9 +121,3 @@ export async function scanTest(source, expected) {
   return 'fail';
 }
 
-export const SCAN_TEXT = {
-  robust: 'Scan-Test bestanden, auch aus der Ferne',
-  gut: 'Scan-Test bestanden',
-  knapp: 'Scan-Test knapp bestanden. Mehr Kontrast oder weniger Inhalt hilft.',
-  fail: 'Scan-Test nicht bestanden. Nimm dunklere Farben oder ein kleineres Logo.',
-};
