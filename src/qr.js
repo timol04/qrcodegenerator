@@ -76,6 +76,41 @@ export function sheetInfo(mm, style = {}) {
   return { cols, rows, count: cols * rows, h, g };
 }
 
+/** Vorschau der A4-Seite für PDF und Stickerbogen (gleiche Anordnung wie im Export). */
+export function pagePreview(stickerCanvas, format, style = {}) {
+  const k = 4; // Pixel pro mm
+  const c = document.createElement('canvas');
+  c.width = A4.w * k;
+  c.height = A4.h * k;
+  const ctx = c.getContext('2d');
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, c.width, c.height);
+  const g = geometry(style.shape, style.label);
+  if (format === 'pdf') {
+    ctx.drawImage(stickerCanvas, 45 * k, 40 * k, 120 * k, 120 * g.h * k);
+  } else {
+    const mm = style.sheetMm ?? 40;
+    const { cols, rows, h } = sheetInfo(mm, style);
+    const x0 = (A4.w - (cols * mm + (cols - 1) * A4.gap)) / 2;
+    const y0 = (A4.h - (rows * h + (rows - 1) * A4.gap)) / 2;
+    ctx.strokeStyle = '#969696';
+    ctx.lineWidth = 1.5;
+    ctx.setLineDash([4, 4]);
+    for (let r = 0; r < rows; r++) {
+      for (let col = 0; col < cols; col++) {
+        const x = (x0 + col * (mm + A4.gap)) * k;
+        const y = (y0 + r * (h + A4.gap)) * k;
+        ctx.drawImage(stickerCanvas, x, y, mm * k, h * k);
+        ctx.beginPath();
+        if (g.circle) ctx.arc(x + (mm * k) / 2, y + (h * k) / 2, (mm * k) / 2, 0, Math.PI * 2);
+        else ctx.roundRect(x, y, mm * k, h * k, g.radius * mm * k);
+        ctx.stroke();
+      }
+    }
+  }
+  return c;
+}
+
 async function sheetPdf(data, style) {
   const { jsPDF } = await import('jspdf');
   const mm = style.sheetMm ?? 40;

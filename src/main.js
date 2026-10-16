@@ -4,7 +4,7 @@ import '@fontsource/schibsted-grotesk/latin-500.css';
 import '@fontsource/schibsted-grotesk/latin-600.css';
 import '@fontsource/schibsted-grotesk/latin-700.css';
 import { UPGRADE_URL, PRO_SWATCHES, LONG_TEXT_LIMIT, PRO_REQUIRED } from './config.js';
-import { renderBlob, saveBlob, sheetInfo, FORMATS } from './qr.js';
+import { renderBlob, saveBlob, sheetInfo, pagePreview, FORMATS } from './qr.js';
 import { composeCanvas, scanTest, geometry, SCAN_TEXT } from './sticker.js';
 import { buildZip } from './batch.js';
 import { formatKey, isCompleteKey, verifyKey } from './license.js';
@@ -85,7 +85,10 @@ async function refresh() {
   if (!current) return;
   const canvas = await composeCanvas(current.data, PREVIEW_W, style);
   if (id !== renderId) return;
-  preview.replaceChildren(canvas);
+  // PDF und Stickerbogen: die ganze A4-Seite zeigen, damit man sich das Ergebnis vorstellen kann
+  const page = format === 'pdf' || format === 'sheet';
+  preview.replaceChildren(page ? pagePreview(canvas, format, style) : canvas);
+  sticker.classList.toggle('is-page', page);
   sticker.classList.remove('is-empty');
   landSticker();
   // Scan-Test mit kurzer Verzögerung, damit das Tippen nicht ruckelt
@@ -306,6 +309,8 @@ formatBox.addEventListener('click', (e) => {
   formatBox.querySelectorAll('.chip').forEach((c) => c.setAttribute('aria-pressed', String(c === chip)));
   sheetRow.hidden = format !== 'sheet';
   refresh();
+  // Auf dem Handy liegt die Vorschau über den Einstellungen: nach der Wahl dorthin scrollen
+  if (!wide.matches && current) $('mat').scrollIntoView({ behavior: reduceMotion.matches ? 'auto' : 'smooth', block: 'center' });
 });
 $('sheet-sizes').addEventListener('click', (e) => {
   const chip = e.target.closest('.chip');

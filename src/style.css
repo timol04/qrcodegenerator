@@ -392,3 +392,7 @@ input.mono { font-family: ui-monospace, 'SFMono-Regular', Menlo, Consolas, monos
 .strength[hidden] { display: none; }
 .strength input[type='range'] { flex: 1; min-width: 0; accent-color: var(--matte); height: 44px; }
 .strength__end { flex: none; }
+
+/* A4-Vorschau bei PDF und Stickerbogen */
+.sticker.is-page { width: min(100%, 300px); }
+.sticker.is-page .preview canvas { background: #fff; border-radius: 2px; }
