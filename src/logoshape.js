@@ -18,11 +18,23 @@ function loadImage(url) {
 
 const lum = (r, g, b) => (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255;
 const QUIET = 3; // Ruhezone in Modulen
-const MAX_BG_LUM = 0.2; // Hintergrund der Form darf nicht heller sein, sonst fehlt der Kontrast
 const FINDER = 7;
-const DARK_IN = 0.42;
-const LIGHT_IN = 0.5; 
-const DOT_OUT = 0.42;
+const DOT_OUT = 0.42; // Punkte ausserhalb der Form (Modul-Anteil)
+
+// Einstellungen für Farbe und Kontrast innerhalb der Form
+export const tuning = {
+  bg: 0.9, // Helligkeit des Logo-Hintergrunds (1 = Originalfarben)
+  darkLum: 0.1, // Helligkeit der dunklen Punkte (Logo-Farbe, abgedunkelt)
+  lightMix: 0.9, // Anteil Weiss in den hellen Punkten (Logo-Farbe, aufgehellt)
+  r: 0.48, // Punktgrösse innerhalb der Form
+};
+
+const darkened = ([r, g, b], target) => {
+  const f = Math.min(1, target / Math.max(lum(r, g, b), 0.001));
+  return `rgb(${Math.round(r * f)},${Math.round(g * f)},${Math.round(b * f)})`;
+};
+const lightened = ([r, g, b], mix) =>
+  `rgb(${Math.round(r + (255 - r) * mix)},${Math.round(g + (255 - g) * mix)},${Math.round(b + (255 - b) * mix)})`;
 
 function buildMatrix(data) {
   // UTF-8-Bytes als Latin-1-Zeichenkette, damit auch Umlaute korrekt kodiert werden
@@ -47,26 +59,50 @@ export async function shapeCodeCanvas(data, size, logoUrl, darkColor = '#000000'
   const origin = QUIET * m;
   const area = n * m;
 
-  // Logo einpassen (contain) und nahezu weisse Pixel freistellen
-  const scale = Math.min(area / img.naturalWidth, area / img.naturalHeight);
-  const lw = Math.max(1, Math.round(img.naturalWidth * scale));
-  const lh = Math.max(1, Math.round(img.naturalHeight * scale));
+  // Logo vorbereiten: weisse und fast weisse Pixel (auch Kompressionsränder bei JPG) freistellen,
+  // auf den sichtbaren Bereich zuschneiden und so gross wie möglich einpassen
+  const wscale = Math.min(1, 2400 / Math.max(img.naturalWidth, img.naturalHeight));
+  const ww = Math.max(1, Math.round(img.naturalWidth * wscale));
+  const wh = Math.max(1, Math.round(img.naturalHeight * wscale));
+  const work = document.createElement('canvas');
+  work.width = ww;
+  work.height = wh;
+  const wctx = work.getContext('2d', { willReadFrequently: true });
+  wctx.drawImage(img, 0, 0, ww, wh);
+  const px = wctx.getImageData(0, 0, ww, wh);
+  const edge = Math.max(3, Math.round(Math.max(ww, wh) * 0.006)); // dünne Ränder im Bild ignorieren
+  const cols = new Uint32Array(ww);
+  const rows = new Uint32Array(wh);
+  for (let y = 0; y < wh; y++) {
+    for (let x = 0; x < ww; x++) {
+      const i = (y * ww + x) * 4;
+      const l = lum(px.data[i], px.data[i + 1], px.data[i + 2]);
+      if (l > 0.93 || x < edge || y < edge || x >= ww - edge || y >= wh - edge) px.data[i + 3] = 0;
+      else if (l > 0.86) px.data[i + 3] *= (0.93 - l) / 0.07;
+      if (px.data[i + 3] > 40) {
+        cols[x]++;
+        rows[y]++;
+      }
+    }
+  }
+  // Sichtbarer Bereich: Zeilen und Spalten mit genug Bildpunkten (einzelne Ausreisser zählen nicht)
+  const minCount = Math.max(3, Math.round(Math.max(ww, wh) * 0.004));
+  const first = (arr) => arr.findIndex((v) => v >= minCount);
+  const last = (arr) => arr.length - 1 - [...arr].reverse().findIndex((v) => v >= minCount);
+  let x0 = first(cols), x1 = last(cols), y0 = first(rows), y1 = last(rows);
+  if (x0 < 0 || y0 < 0 || x1 < x0 || y1 < y0) { x0 = 0; y0 = 0; x1 = ww - 1; y1 = wh - 1; }
+  wctx.putImageData(px, 0, 0);
+  const bw = x1 - x0 + 1;
+  const bh = y1 - y0 + 1;
+  const scale = Math.min(area / bw, area / bh);
+  const lw = Math.max(1, Math.round(bw * scale));
+  const lh = Math.max(1, Math.round(bh * scale));
   const lx = origin + (area - lw) / 2;
   const ly = origin + (area - lh) / 2;
   const logo = document.createElement('canvas');
   logo.width = lw;
   logo.height = lh;
-  const lctx = logo.getContext('2d', { willReadFrequently: true });
-  lctx.drawImage(img, 0, 0, lw, lh);
-  const px = lctx.getImageData(0, 0, lw, lh);
-  let maxLum = 0;
-  for (let i = 0; i < px.data.length; i += 4) {
-    const l = lum(px.data[i], px.data[i + 1], px.data[i + 2]);
-    if (px.data[i + 3] < 128 || l > 0.92) px.data[i + 3] = 0;
-    else if (l > maxLum) maxLum = l;
-  }
-  lctx.putImageData(px, 0, 0);
-  const darken = maxLum > MAX_BG_LUM ? MAX_BG_LUM / maxLum : 1;
+  logo.getContext('2d').drawImage(work, x0, y0, bw, bh, 0, 0, lw, lh);
 
   // Pro Modul: liegt es in der Logo-Form? Dazu Durchschnittsfarbe für die Eck-Markierungen.
   const mask = document.createElement('canvas');
@@ -96,7 +132,7 @@ export async function shapeCodeCanvas(data, size, logoUrl, darkColor = '#000000'
   ctx.fillStyle = '#ffffff';
   ctx.fillRect(0, 0, size, size);
   ctx.save();
-  ctx.filter = `brightness(${darken})`;
+  ctx.filter = `brightness(${tuning.bg})`;
   ctx.drawImage(logo, lx, ly, lw, lh);
   ctx.restore();
 
@@ -111,9 +147,14 @@ export async function shapeCodeCanvas(data, size, logoUrl, darkColor = '#000000'
   for (let r = 0; r < n; r++) {
     for (let c = 0; c < n; c++) {
       if (inFinder(r, c)) continue;
-      const inLogo = inside(r, c);
-      if (qr.isDark(r, c)) dot(r, c, inLogo ? DARK_IN : DOT_OUT, darkColor);
-      else if (inLogo) dot(r, c, LIGHT_IN, '#ffffff');
+      if (!inside(r, c)) {
+        if (qr.isDark(r, c)) dot(r, c, DOT_OUT, darkColor);
+        continue;
+      }
+      // In der Form tragen die Punkte die Farbe des Logos: dunkel für dunkle, hell für helle Module
+      const i = (r * n + c) * 4;
+      const col = [md[i], md[i + 1], md[i + 2]];
+      dot(r, c, tuning.r, qr.isDark(r, c) ? darkened(col, tuning.darkLum) : lightened(col, tuning.lightMix));
     }
   }
 
