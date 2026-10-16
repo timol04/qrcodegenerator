@@ -78,6 +78,16 @@
 
           <div class="pro__rows">
             <div class="pro-row" data-locked>
+              <span class="pro-row__label">Punkte</span>
+              <div class="pro-row__control chips" id="dot-styles" role="group" aria-label="Form der Punkte">
+                <button type="button" class="chip" data-dots="dots" aria-pressed="true">Rund</button>
+                <button type="button" class="chip" data-dots="rounded" aria-pressed="false" data-pro-gate>Weich</button>
+                <button type="button" class="chip" data-dots="classy" aria-pressed="false" data-pro-gate>Elegant</button>
+                <button type="button" class="chip" data-dots="square" aria-pressed="false" data-pro-gate>Eckig</button>
+              </div>
+              <span class="pro-badge"><svg width="12" height="12" aria-hidden="true"><use href="#i-lock" /></svg><span class="pro-badge__short">Pro</span><span class="pro-badge__hint">Mit Pro verfügbar</span></span>
+            </div>
+            <div class="pro-row" data-locked>
               <span class="pro-row__label">Sticker</span>
               <div class="pro-row__control chips" id="shapes" role="group" aria-label="Form des Stickers">
                 <button type="button" class="chip" data-shape="square" aria-pressed="true">Quadrat</button>

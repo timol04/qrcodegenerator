@@ -52,7 +52,7 @@ darkQuery.addEventListener('change', syncThemeLabel);
 syncThemeLabel();
 
 // --- Stil und Format (Farbe, Logo, Form, Beschriftung, Dateiformat) ---
-const style = { color: '#000000', logo: null, shape: 'square', label: '', sheetMm: 40 };
+const style = { color: '#000000', logo: null, dots: 'dots', shape: 'square', label: '', sheetMm: 40 };
 let format = 'png';
 let current = null; // { kind, data, bytes } oder null, wenn nichts (Gültiges) eingegeben ist
 // Bei gesperrtem Pro gilt für Export nur der Gratis-Stil; Farbe und Vorschau sind dann reine Vorschau.
@@ -248,6 +248,16 @@ logoFile.addEventListener('change', () => {
   reader.readAsDataURL(file);
 });
 logoRemove.addEventListener('click', () => setLogo(null));
+
+// --- Punktform (Gratis-Stil bleibt Rund) ---
+const dotBox = $('dot-styles');
+dotBox.addEventListener('click', (e) => {
+  const chip = e.target.closest('.chip');
+  if (!chip || (chip.dataset.dots !== 'dots' && gated())) return;
+  style.dots = chip.dataset.dots;
+  dotBox.querySelectorAll('.chip').forEach((c) => c.setAttribute('aria-pressed', String(c === chip)));
+  refresh();
+});
 
 // --- Sticker: Form und Beschriftung ---
 const shapeBox = $('shapes');

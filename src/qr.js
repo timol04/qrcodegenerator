@@ -10,8 +10,17 @@ export const FORMATS = {
   sheet: { label: 'Stickerbogen', ext: 'pdf', size: 800, caption: 'A4 · Stickerbogen mit Schnittlinien' },
 };
 
+/** Punktformen: Form der Module und passend dazu die Form der drei Eck-Markierungen. */
+export const DOT_STYLES = {
+  dots: { label: 'Rund', dots: 'dots', eye: 'square', eyeDot: 'dot' },
+  rounded: { label: 'Weich', dots: 'rounded', eye: 'square', eyeDot: 'dot' },
+  classy: { label: 'Elegant', dots: 'classy-rounded', eye: 'square', eyeDot: 'dot' },
+  square: { label: 'Eckig', dots: 'square', eye: 'square', eyeDot: 'square' },
+};
+
 /** Optionen für qr-code-styling: Farbe der Module und optionales Logo (Data-URL). */
-function options({ data, size, color = '#000000', logo = null }) {
+function options({ data, size, color = '#000000', logo = null, dots = 'dots' }) {
+  const d = DOT_STYLES[dots] ?? DOT_STYLES.dots;
   return {
     width: size,
     height: size,
@@ -19,9 +28,9 @@ function options({ data, size, color = '#000000', logo = null }) {
     data,
     // Mit Logo in der Mitte braucht der Code mehr Fehlerkorrektur, damit er scanbar bleibt.
     qrOptions: { errorCorrectionLevel: logo ? 'H' : 'M' },
-    dotsOptions: { color, type: 'square' },
-    cornersSquareOptions: { color, type: 'square' },
-    cornersDotOptions: { color, type: 'square' },
+    dotsOptions: { color, type: d.dots },
+    cornersSquareOptions: { color, type: d.eye },
+    cornersDotOptions: { color, type: d.eyeDot },
     backgroundOptions: { color: '#ffffff' },
     image: logo || undefined,
     imageOptions: { hideBackgroundDots: true, imageSize: 0.26, margin: Math.round(size * 0.01), crossOrigin: 'anonymous' },
@@ -30,7 +39,7 @@ function options({ data, size, color = '#000000', logo = null }) {
 
 /** Nur der QR-Code (ohne Sticker) als Blob. */
 export function codeBlob(data, size, style = {}, type = 'png') {
-  return new QRCodeStyling(options({ data, size, color: style.color, logo: style.logo })).getRawData(type);
+  return new QRCodeStyling(options({ data, size, color: style.color, logo: style.logo, dots: style.dots })).getRawData(type);
 }
 
 function blobToDataUrl(blob) {
