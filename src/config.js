@@ -1,7 +1,10 @@
 // Zentrale Einstellungen – hier anpassen, ohne den Rest des Codes anzufassen.
 
-// TODO: durch den echten Gumroad-Produktlink ersetzen.
-export const UPGRADE_URL = 'https://gumroad.com/l/DEIN-PRODUKT';
+// TODO: durch den echten Lemon-Squeezy-Checkout-Link ersetzen.
+export const UPGRADE_URL = 'https://DEIN-SHOP.lemonsqueezy.com/buy/DEIN-PRODUKT';
+
+// TODO: Produkt-ID aus Lemon Squeezy eintragen (Zahl). Solange leer, ist die Schlüsselprüfung aus.
+export const LS_PRODUCT_ID = '';
 
 // Grösse des Gratis-QR-Codes in Pixeln (reicht für ca. 8 cm Druck bei 300 dpi).
 export const QR_SIZE = 1000;

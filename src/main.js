@@ -8,7 +8,7 @@ import { renderBlob, saveBlob, sheetInfo, pagePreview, FORMATS } from './qr.js';
 import { composeCanvas, scanTest, geometry } from './sticker.js';
 import { t, applyI18n, setLang, getLang, onLangChange } from './i18n.js';
 import { buildZip } from './batch.js';
-import { formatKey, isCompleteKey, verifyKey } from './license.js';
+import { formatKey, isCompleteKey, verifyKey, saveKey, savedKey } from './license.js';
 import { analyze, fileName, MAX_BYTES } from './content.js';
 
 const $ = (id) => document.getElementById(id);
@@ -209,7 +209,7 @@ $('license-form').addEventListener('submit', async (e) => {
   const fail = (msg) => { keyMsg.textContent = msg; keyMsg.classList.add('is-error'); };
   if (!isCompleteKey(key)) return fail(t('lic.invalid'));
   const result = await verifyKey(key);
-  if (result === 'ok') { licenseDialog.close(); unlockPro(); }
+  if (result === 'ok') { saveKey(key); licenseDialog.close(); unlockPro(); }
   else if (result === 'unavailable') fail(t('lic.unavailable'));
   else fail(t('lic.invalid'));
 });
@@ -368,6 +368,12 @@ function unlockPro() {
     applyI18n();
     showToast(t('lic.unlocked'));
   }, delay);
+}
+
+// Gespeicherten Schlüssel beim Start erneut prüfen (nur bei gesperrtem Pro)
+if (PRO_REQUIRED) {
+  const stored = savedKey();
+  if (stored && isCompleteKey(stored)) verifyKey(stored).then((r) => { if (r === 'ok' && !proActive) unlockPro(); });
 }
 
 // --- Sprache ---
